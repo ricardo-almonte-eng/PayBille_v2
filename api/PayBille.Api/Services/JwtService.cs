@@ -8,6 +8,7 @@ using MongoDB.Driver;
 using PayBille.Api.Configuration;
 using PayBille.Api.DTOs.Auth;
 using PayBille.Api.Infrastructure;
+using PayBille.Api.Interfaces;
 using PayBille.Api.Models;
 
 namespace PayBille.Api.Services;
@@ -69,7 +70,7 @@ public sealed class JwtService : IJwtService
     // -------------------------------------------------------------------------
 
     /// <inheritdoc/>
-    public async Task<AuthResponse> LoginAsync(string username, string password, CancellationToken ct = default)
+    public async Task<UserAuthResDto> LoginAsync(string username, string password, CancellationToken ct = default)
     {
         var user = await _users
             .Find(u => u.Username == username)
@@ -82,7 +83,7 @@ public sealed class JwtService : IJwtService
     }
 
     /// <inheritdoc/>
-    public async Task<AuthResponse> RefreshAsync(string refreshToken, CancellationToken ct = default)
+    public async Task<UserAuthResDto> RefreshAsync(string refreshToken, CancellationToken ct = default)
     {
         var user = await _users
             .Find(u => u.RefreshTokens.Any(rt => rt.Token == refreshToken))
@@ -126,7 +127,7 @@ public sealed class JwtService : IJwtService
     // Helpers
     // -------------------------------------------------------------------------
 
-    private async Task<AuthResponse> BuildAndPersistTokenPairAsync(User user, CancellationToken ct)
+    private async Task<UserAuthResDto> BuildAndPersistTokenPairAsync(User user, CancellationToken ct)
     {
         var expiry = DateTime.UtcNow.AddMinutes(_jwt.AccessTokenExpiryMinutes);
         var accessToken = GenerateAccessToken(user);
@@ -147,7 +148,7 @@ public sealed class JwtService : IJwtService
 
         await PersistUserAsync(user, ct);
 
-        return new AuthResponse
+        return new UserAuthResDto
         {
             AccessToken = accessToken,
             RefreshToken = rawRefresh,

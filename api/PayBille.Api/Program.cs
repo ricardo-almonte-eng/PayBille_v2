@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PayBille.Api.Configuration;
 using PayBille.Api.Infrastructure;
+using PayBille.Api.Interfaces;
 using PayBille.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);

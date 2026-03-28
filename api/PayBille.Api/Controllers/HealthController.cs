@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PayBille.Api.Services;
+using PayBille.Api.Interfaces;
 
 namespace PayBille.Api.Controllers;
 

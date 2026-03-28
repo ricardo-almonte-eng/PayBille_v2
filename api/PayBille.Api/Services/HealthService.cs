@@ -1,5 +1,6 @@
 using MongoDB.Bson;
 using PayBille.Api.Infrastructure;
+using PayBille.Api.Interfaces;
 
 namespace PayBille.Api.Services;
 
