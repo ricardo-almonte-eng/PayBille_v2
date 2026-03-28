@@ -1,4 +1,4 @@
-namespace PayBille.Api.Services;
+namespace PayBille.Api.Interfaces;
 
 public interface IHealthService
 {

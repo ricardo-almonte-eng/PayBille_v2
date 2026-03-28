@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PayBille.Api.DTOs.Auth;
-using PayBille.Api.Services;
+using PayBille.Api.Interfaces;
 
 namespace PayBille.Api.Controllers;
 
@@ -22,11 +22,11 @@ public sealed class AuthController : ControllerBase
     /// </summary>
     [AllowAnonymous]
     [HttpPost("login")]
-    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(UserAuthResDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login(
-        [FromBody] LoginRequest request,
+        [FromBody] UserLoginReqDto request,
         CancellationToken cancellationToken)
     {
         try
@@ -46,11 +46,11 @@ public sealed class AuthController : ControllerBase
     /// </summary>
     [AllowAnonymous]
     [HttpPost("refresh")]
-    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(UserAuthResDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Refresh(
-        [FromBody] RefreshTokenRequest request,
+        [FromBody] UserRefreshTokenReqDto request,
         CancellationToken cancellationToken)
     {
         try
@@ -74,7 +74,7 @@ public sealed class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Logout(
-        [FromBody] RefreshTokenRequest request,
+        [FromBody] UserRefreshTokenReqDto request,
         CancellationToken cancellationToken)
     {
         await _jwtService.RevokeAsync(request.RefreshToken, cancellationToken);
