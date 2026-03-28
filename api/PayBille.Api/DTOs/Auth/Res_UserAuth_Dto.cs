@@ -1,6 +1,6 @@
 namespace PayBille.Api.DTOs.Auth;
 
-public sealed class UserAuthResDto
+public sealed class Res_UserAuth_Dto
 {
     public string AccessToken { get; set; } = string.Empty;
     public string RefreshToken { get; set; } = string.Empty;

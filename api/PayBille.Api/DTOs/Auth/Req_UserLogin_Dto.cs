@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PayBille.Api.DTOs.Auth;
 
-public sealed class UserLoginReqDto
+public sealed class Req_UserLogin_Dto
 {
     [Required(ErrorMessage = "Username is required")]
     public string Username { get; set; } = string.Empty;

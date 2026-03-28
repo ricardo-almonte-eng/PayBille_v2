@@ -22,11 +22,11 @@ public sealed class AuthController : ControllerBase
     /// </summary>
     [AllowAnonymous]
     [HttpPost("login")]
-    [ProducesResponseType(typeof(UserAuthResDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Res_UserAuth_Dto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login(
-        [FromBody] UserLoginReqDto request,
+        [FromBody] Req_UserLogin_Dto request,
         CancellationToken cancellationToken)
     {
         try
@@ -46,11 +46,11 @@ public sealed class AuthController : ControllerBase
     /// </summary>
     [AllowAnonymous]
     [HttpPost("refresh")]
-    [ProducesResponseType(typeof(UserAuthResDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Res_UserAuth_Dto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Refresh(
-        [FromBody] UserRefreshTokenReqDto request,
+        [FromBody] Req_UserRefreshToken_Dto request,
         CancellationToken cancellationToken)
     {
         try
@@ -74,7 +74,7 @@ public sealed class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Logout(
-        [FromBody] UserRefreshTokenReqDto request,
+        [FromBody] Req_UserRefreshToken_Dto request,
         CancellationToken cancellationToken)
     {
         await _jwtService.RevokeAsync(request.RefreshToken, cancellationToken);

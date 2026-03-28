@@ -70,7 +70,7 @@ public sealed class JwtService : IJwtService
     // -------------------------------------------------------------------------
 
     /// <inheritdoc/>
-    public async Task<UserAuthResDto> LoginAsync(string username, string password, CancellationToken ct = default)
+    public async Task<Res_UserAuth_Dto> LoginAsync(string username, string password, CancellationToken ct = default)
     {
         var user = await _users
             .Find(u => u.Username == username)
@@ -83,7 +83,7 @@ public sealed class JwtService : IJwtService
     }
 
     /// <inheritdoc/>
-    public async Task<UserAuthResDto> RefreshAsync(string refreshToken, CancellationToken ct = default)
+    public async Task<Res_UserAuth_Dto> RefreshAsync(string refreshToken, CancellationToken ct = default)
     {
         var user = await _users
             .Find(u => u.RefreshTokens.Any(rt => rt.Token == refreshToken))
@@ -127,7 +127,7 @@ public sealed class JwtService : IJwtService
     // Helpers
     // -------------------------------------------------------------------------
 
-    private async Task<UserAuthResDto> BuildAndPersistTokenPairAsync(User user, CancellationToken ct)
+    private async Task<Res_UserAuth_Dto> BuildAndPersistTokenPairAsync(User user, CancellationToken ct)
     {
         var expiry = DateTime.UtcNow.AddMinutes(_jwt.AccessTokenExpiryMinutes);
         var accessToken = GenerateAccessToken(user);
@@ -148,7 +148,7 @@ public sealed class JwtService : IJwtService
 
         await PersistUserAsync(user, ct);
 
-        return new UserAuthResDto
+        return new Res_UserAuth_Dto
         {
             AccessToken = accessToken,
             RefreshToken = rawRefresh,
