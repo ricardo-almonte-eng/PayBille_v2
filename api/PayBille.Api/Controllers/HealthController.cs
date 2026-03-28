@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PayBille.Api.Services;
 
@@ -5,6 +6,7 @@ namespace PayBille.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[AllowAnonymous]
 public sealed class HealthController : ControllerBase
 {
     private readonly IHealthService _healthService;
