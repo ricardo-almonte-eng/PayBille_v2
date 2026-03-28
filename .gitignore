@@ -1,0 +1,20 @@
+# Node
+view/.nuxt
+view/.output
+view/node_modules
+view/.nitro
+
+# .NET
+api/**/bin
+api/**/obj
+api/**/.vs
+
+# Logs and env
+*.log
+.env
+.env.*
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/*.log
