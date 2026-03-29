@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PayBille.Api.DTOs;
+using PayBille.Api.DTOs.Imagen;
 using PayBille.Api.DTOs.Market;
 using PayBille.Api.Errors;
 using PayBille.Api.Interfaces;
@@ -14,11 +15,16 @@ namespace PayBille.Api.Controllers;
 public sealed class MarketController : ControllerBase
 {
     private readonly IMarketService _marketService;
+    private readonly IImagenService _imagenService;
     private readonly IValidator<MarketReqDto> _validator;
 
-    public MarketController(IMarketService marketService, IValidator<MarketReqDto> validator)
+    public MarketController(
+        IMarketService marketService,
+        IImagenService imagenService,
+        IValidator<MarketReqDto> validator)
     {
         _marketService = marketService;
+        _imagenService = imagenService;
         _validator     = validator;
     }
 
@@ -104,5 +110,26 @@ public sealed class MarketController : ControllerBase
         return Ok(result.IsSuccess
             ? ApiRespDto<bool>.Ok(true)
             : ApiRespDto<bool>.Error(result.Error!));
+    }
+
+    /// <summary>
+    /// Sube y asocia una imagen al market indicado por IdMarket.
+    /// El archivo debe enviarse como multipart/form-data en el campo "archivo".
+    /// </summary>
+    [HttpPost("{id}/imagen")]
+    [ProducesResponseType(typeof(ApiRespDto<ImagenResDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> SubirImagen(
+        string id,
+        IFormFile archivo,
+        CancellationToken cancellationToken)
+    {
+        var resultImagen = await _imagenService.SubirAsync(archivo, "markets", cancellationToken);
+        if (!resultImagen.IsSuccess)
+            return Ok(ApiRespDto<ImagenResDto>.Error(resultImagen.Error!));
+
+        var resultActualizar = await _marketService.ActualizarImagenAsync(id, resultImagen.Value!.Url, cancellationToken);
+        return Ok(resultActualizar.IsSuccess
+            ? ApiRespDto<ImagenResDto>.Ok(resultImagen.Value!)
+            : ApiRespDto<ImagenResDto>.Error(resultActualizar.Error!));
     }
 }

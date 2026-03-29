@@ -24,4 +24,10 @@ public interface IMarketService
     /// Returns Fail(MAD01) si no existía.
     /// </summary>
     Task<Result<bool>> EliminarAsync(string idMarket, CancellationToken ct);
+
+    /// <summary>
+    /// Actualiza el campo imagen del market con la URL proporcionada.
+    /// Returns Fail(MAU01) si el market no existe.
+    /// </summary>
+    Task<Result<bool>> ActualizarImagenAsync(string idMarket, string urlImagen, CancellationToken ct);
 }

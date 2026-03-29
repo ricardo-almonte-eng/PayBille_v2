@@ -3,6 +3,8 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PayBille.Api.Configuration;
@@ -27,6 +29,10 @@ builder.Services.AddScoped(typeof(IMongoRepository<>), typeof(MongoRepository<>)
 // Register specific repositories
 builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.PersonaRepository>();
 builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.MarketRepository>();
+
+// ── Imagenes ───────────────────────────────────────────────────────────────
+builder.Services.Configure<ImagenSettings>(
+    builder.Configuration.GetSection(ImagenSettings.SectionName));
 
 // ── JWT ────────────────────────────────────────────────────────────────────
 builder.Services.Configure<JwtSettings>(
@@ -76,6 +82,7 @@ builder.Services.AddScoped<IHealthService, HealthService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<PayBille.Api.Interfaces.IPersonaService, PayBille.Api.Services.PersonaService>();
 builder.Services.AddScoped<PayBille.Api.Interfaces.IMarketService, PayBille.Api.Services.MarketService>();
+builder.Services.AddScoped<PayBille.Api.Interfaces.IImagenService, PayBille.Api.Services.ImagenService>();
 builder.Services.AddScoped<PayBille.Api.Infrastructure.Services.MongoDbInitializerService>();
 
 // ── MVC / Swagger ──────────────────────────────────────────────────────────
@@ -153,6 +160,20 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("PayBilleFrontend");
+
+// ── Archivos estáticos (imágenes subidas) ──────────────────────────────────
+var imagenSettings = app.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<ImagenSettings>>().Value;
+var imagenBaseDir  = Path.IsPathRooted(imagenSettings.DirectorioBase)
+    ? imagenSettings.DirectorioBase
+    : Path.Combine(app.Environment.ContentRootPath, imagenSettings.DirectorioBase);
+Directory.CreateDirectory(imagenBaseDir);
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(imagenBaseDir),
+    RequestPath  = "/imagenes",
+    ContentTypeProvider = new FileExtensionContentTypeProvider(),
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

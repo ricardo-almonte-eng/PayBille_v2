@@ -87,6 +87,21 @@ public sealed class MarketService : IMarketService
             : Result<bool>.Fail(AppErrors.MarketEliminarNoEncontrado(idMarket));
     }
 
+    /// <inheritdoc/>
+    public async Task<Result<bool>> ActualizarImagenAsync(string idMarket, string urlImagen, CancellationToken ct)
+    {
+        var filter    = Builders<Market>.Filter.Eq(m => m.IdMarket, idMarket);
+        var existente = await _marketRepository.FindOneAsync(filter, ct);
+        if (existente is null)
+            return Result<bool>.Fail(AppErrors.MarketImagenNoEncontrado(idMarket));
+
+        existente.Image = urlImagen;
+        await _marketRepository.UpsertAsync(existente, ct);
+
+        _logger.LogInformation("Imagen del market {IdMarket} actualizada a {Url}.", idMarket, urlImagen);
+        return Result<bool>.Ok(true);
+    }
+
     // ── Mapping ──────────────────────────────────────────────────────────────
 
     private static MarketResDto MapToDto(Market m) => new()
