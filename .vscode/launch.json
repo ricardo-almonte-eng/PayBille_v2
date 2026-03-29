@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "PayBille.Api — Launch & Debug",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/api/PayBille.Api/PayBille.Api.csproj",
+      "launchSettingsFilePath": "${workspaceFolder}/api/PayBille.Api/Properties/launchSettings.json",
+      "launchSettingsProfile": "PayBille.Api",
+      "hotReloadOnSave": true,
+      "preLaunchTask": "build: PayBille.Api"
+    },
+    {
+      "name": "PayBille.Api — Attach",
+      "type": "dotnet",
+      "request": "attach"
+    }
+  ]
+}

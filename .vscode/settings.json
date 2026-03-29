@@ -1,0 +1,7 @@
+{
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    {
+      "text": "Genera el mensaje de commit en español. Mantén el prefijo de commit convencional al inicio seguido de dos puntos (ej: feat:, fix:, chore:, refactor:, docs:, test:, perf:, style:). El resto del mensaje debe estar completamente en español."
+    }
+  ]
+}
