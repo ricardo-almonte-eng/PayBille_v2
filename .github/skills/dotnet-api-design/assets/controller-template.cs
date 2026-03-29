@@ -1,59 +1,95 @@
+// ── PayBille v2 Controller Template ─────────────────────────────────────────
+// Reglas:
+//   - Todos los endpoints retornan HTTP 200 (errors de negocio en body)
+//   - Sin try/catch — los errores de dominio los maneja Result<T>
+//   - FluentValidation llamado manualmente antes del servicio
+//   - Usar ApiRespDto<T>.Ok() / ApiRespDto<T>.Error(result.Error!)
+// ─────────────────────────────────────────────────────────────────────────────
+using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PayBille.Services;
+using PayBille.Api.DTOs;
+using PayBille.Api.DTOs.{Entidad};
+using PayBille.Api.Errors;
+using PayBille.Api.Interfaces;
 
-namespace PayBille.API.Controllers
+namespace PayBille.Api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public sealed class {Entidad}Controller : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ItemsController : ControllerBase
+    private readonly I{Entidad}Service _{entidad}Service;
+    private readonly IValidator<{Entidad}ReqDto> _validator;
+
+    public {Entidad}Controller(I{Entidad}Service {entidad}Service, IValidator<{Entidad}ReqDto> validator)
     {
-        private readonly IItemService _service;
+        _{entidad}Service = {entidad}Service;
+        _validator        = validator;
+    }
 
-        public ItemsController(IItemService service)
+    [HttpGet]
+    [ProducesResponseType(typeof(ApiRespDto<List<{Entidad}ResDto>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ObtenerTodos(CancellationToken cancellationToken)
+    {
+        var result = await _{entidad}Service.ObtenerTodosAsync(cancellationToken);
+        return Ok(result.IsSuccess
+            ? ApiRespDto<List<{Entidad}ResDto>>.Ok(result.Value!)
+            : ApiRespDto<List<{Entidad}ResDto>>.Error(result.Error!));
+    }
+
+    [HttpGet("{id}")]
+    [ProducesResponseType(typeof(ApiRespDto<{Entidad}ResDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ObtenerPorId(string id, CancellationToken cancellationToken)
+    {
+        var result = await _{entidad}Service.ObtenerPorIdAsync(id, cancellationToken);
+        return Ok(result.IsSuccess
+            ? ApiRespDto<{Entidad}ResDto>.Ok(result.Value!)
+            : ApiRespDto<{Entidad}ResDto>.Error(result.Error!));
+    }
+
+    [HttpPost]
+    [ProducesResponseType(typeof(ApiRespDto<{Entidad}ResDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Crear([FromBody] {Entidad}ReqDto request, CancellationToken cancellationToken)
+    {
+        var validation = await _validator.ValidateAsync(request, cancellationToken);
+        if (!validation.IsValid)
         {
-            _service = service;
+            var detalle = string.Join(" | ", validation.Errors.Select(e => e.ErrorMessage));
+            return Ok(ApiRespDto<{Entidad}ResDto>.Error(AppErrors.{Entidad}ValidacionFallida(detalle)));
         }
 
-        /// <summary>
-        /// Create a new item
-        /// </summary>
-        [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<ItemResponse>> CreateItem([FromBody] CreateItemRequest request)
+        var result = await _{entidad}Service.CrearAsync(request, cancellationToken);
+        return Ok(result.IsSuccess
+            ? ApiRespDto<{Entidad}ResDto>.Ok(result.Value!)
+            : ApiRespDto<{Entidad}ResDto>.Error(result.Error!));
+    }
+
+    [HttpPut("{id}")]
+    [ProducesResponseType(typeof(ApiRespDto<{Entidad}ResDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Actualizar(string id, [FromBody] {Entidad}ReqDto request, CancellationToken cancellationToken)
+    {
+        var validation = await _validator.ValidateAsync(request, cancellationToken);
+        if (!validation.IsValid)
         {
-            var result = await _service.CreateItemAsync(request);
-            return CreatedAtAction(nameof(GetItem), new { id = result.Id }, result);
+            var detalle = string.Join(" | ", validation.Errors.Select(e => e.ErrorMessage));
+            return Ok(ApiRespDto<{Entidad}ResDto>.Error(AppErrors.{Entidad}ValidacionFallida(detalle)));
         }
 
-        /// <summary>
-        /// Get item by ID
-        /// </summary>
-        [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ItemResponse>> GetItem(string id)
-        {
-            try
-            {
-                var result = await _service.GetItemAsync(id);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
-        }
+        var result = await _{entidad}Service.ActualizarAsync(id, request, cancellationToken);
+        return Ok(result.IsSuccess
+            ? ApiRespDto<{Entidad}ResDto>.Ok(result.Value!)
+            : ApiRespDto<{Entidad}ResDto>.Error(result.Error!));
+    }
 
-        /// <summary>
-        /// List all items
-        /// </summary>
-        [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<ItemResponse>>> ListItems()
-        {
-            var results = await _service.ListItemsAsync();
-            return Ok(results);
-        }
+    [HttpDelete("{id}")]
+    [ProducesResponseType(typeof(ApiRespDto<bool>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Eliminar(string id, CancellationToken cancellationToken)
+    {
+        var result = await _{entidad}Service.EliminarAsync(id, cancellationToken);
+        return Ok(result.IsSuccess
+            ? ApiRespDto<bool>.Ok(true)
+            : ApiRespDto<bool>.Error(result.Error!));
     }
 }

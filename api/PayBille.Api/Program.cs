@@ -1,11 +1,17 @@
 using System.Text;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PayBille.Api.Configuration;
+using PayBille.Api.DTOs;
+using PayBille.Api.Errors;
 using PayBille.Api.Infrastructure;
 using PayBille.Api.Interfaces;
 using PayBille.Api.Services;
+using PayBille.Api.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +20,12 @@ builder.Services.Configure<MongoDbSettings>(
     builder.Configuration.GetSection(MongoDbSettings.SectionName));
 
 builder.Services.AddSingleton<MongoDbContext>();
+
+// Register generic repository factory
+builder.Services.AddScoped(typeof(IMongoRepository<>), typeof(MongoRepository<>));
+
+// Register specific repositories
+builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.PersonaRepository>();
 
 // ── JWT ────────────────────────────────────────────────────────────────────
 builder.Services.Configure<JwtSettings>(
@@ -43,6 +55,17 @@ builder.Services
                                            Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
             ClockSkew                = TimeSpan.Zero
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnChallenge = async context =>
+            {
+                context.HandleResponse();
+                context.Response.StatusCode  = StatusCodes.Status401Unauthorized;
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsJsonAsync(
+                    ApiRespDto<object>.Error(AppErrors.AuthSinToken()));
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
@@ -50,9 +73,16 @@ builder.Services.AddAuthorization();
 // ── Application services ───────────────────────────────────────────────────
 builder.Services.AddScoped<IHealthService, HealthService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<PayBille.Api.Interfaces.IPersonaService, PayBille.Api.Services.PersonaService>();
+builder.Services.AddScoped<PayBille.Api.Infrastructure.Services.MongoDbInitializerService>();
 
 // ── MVC / Swagger ──────────────────────────────────────────────────────────
 builder.Services.AddControllers();
+
+// ── FluentValidation ──────────────────────────────────────────────────────
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<PersonaReqDtoValidator>();
+builder.Services.Configure<ApiBehaviorOptions>(o => o.SuppressModelStateInvalidFilter = true);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -97,7 +127,21 @@ builder.Services.AddCors(options =>
     });
 });
 
+// ── Exception handling ─────────────────────────────────────────────────────
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
+
+// ── Exception handler must be first in the pipeline ───────────────────────
+app.UseExceptionHandler();
+
+// ── Initialize MongoDB ─────────────────────────────────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    var initializer = scope.ServiceProvider.GetRequiredService<PayBille.Api.Infrastructure.Services.MongoDbInitializerService>();
+    await initializer.InitializeAsync(CancellationToken.None);
+}
 
 if (app.Environment.IsDevelopment())
 {

@@ -1,0 +1,15 @@
+meta {
+  name: Eliminar
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/persona/{{personaId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

@@ -5,9 +5,11 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
+using PayBille.Api.Common;
 using PayBille.Api.Configuration;
 using PayBille.Api.DTOs.Auth;
-using PayBille.Api.Infrastructure;
+using PayBille.Api.Errors;
+using PayBille.Api.Infrastructure.Repositories;
 using PayBille.Api.Interfaces;
 using PayBille.Api.Models;
 
@@ -16,16 +18,16 @@ namespace PayBille.Api.Services;
 public sealed class JwtService : IJwtService
 {
     private readonly JwtSettings _jwt;
-    private readonly IMongoCollection<User> _users;
+    private readonly PersonaRepository _personaRepository;
     private readonly ILogger<JwtService> _logger;
 
     public JwtService(
         IOptions<JwtSettings> jwtOptions,
-        MongoDbContext dbContext,
+        PersonaRepository personaRepository,
         ILogger<JwtService> logger)
     {
         _jwt = jwtOptions.Value;
-        _users = dbContext.Database.GetCollection<User>("users");
+        _personaRepository = personaRepository;
         _logger = logger;
     }
 
@@ -34,7 +36,7 @@ public sealed class JwtService : IJwtService
     // -------------------------------------------------------------------------
 
     /// <inheritdoc/>
-    public string GenerateAccessToken(User user)
+    public string GenerateAccessToken(Persona persona)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.SecretKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -42,9 +44,9 @@ public sealed class JwtService : IJwtService
 
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-            new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
-            new Claim(ClaimTypes.Role, user.Role),
+            new Claim(JwtRegisteredClaimNames.Sub, persona.Id),
+            new Claim(JwtRegisteredClaimNames.UniqueName, persona.Usuario.NombreUsuario),
+            new Claim(ClaimTypes.Role, persona.Usuario.IdRol.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
@@ -70,83 +72,79 @@ public sealed class JwtService : IJwtService
     // -------------------------------------------------------------------------
 
     /// <inheritdoc/>
-    public async Task<UserAuthResDto> LoginAsync(string username, string password, CancellationToken ct = default)
+    public async Task<Result<UserAuthResDto>> LoginAsync(string username, string password, CancellationToken ct = default)
     {
-        var user = await _users
-            .Find(u => u.Username == username)
-            .FirstOrDefaultAsync(ct);
+        var persona = await _personaRepository.FindByNombreUsuarioAsync(username, ct);
 
-        if (user is null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
-            throw new UnauthorizedAccessException("Invalid username or password.");
+        if (persona is null || !BCrypt.Net.BCrypt.Verify(password, persona.Usuario.ContrasenaHash))
+            return Result<UserAuthResDto>.Fail(AppErrors.AuthCredencialesInvalidas());
 
-        return await BuildAndPersistTokenPairAsync(user, ct);
+        return Result<UserAuthResDto>.Ok(await BuildAndPersistTokenPairAsync(persona, ct));
     }
 
     /// <inheritdoc/>
-    public async Task<UserAuthResDto> RefreshAsync(string refreshToken, CancellationToken ct = default)
+    public async Task<Result<UserAuthResDto>> RefreshAsync(string refreshToken, CancellationToken ct = default)
     {
-        var user = await _users
-            .Find(u => u.RefreshTokens.Any(rt => rt.Token == refreshToken))
-            .FirstOrDefaultAsync(ct);
+        var filter = Builders<Persona>.Filter.ElemMatch(p => p.Usuario.TokensRefresh, rt => rt.Token == refreshToken);
+        var persona = await _personaRepository.FindOneAsync(filter, ct);
 
-        if (user is null)
-            throw new UnauthorizedAccessException("Invalid refresh token.");
+        if (persona is null)
+            return Result<UserAuthResDto>.Fail(AppErrors.AuthTokenInvalido());
 
-        var storedToken = user.RefreshTokens.First(rt => rt.Token == refreshToken);
+        var storedToken = persona.Usuario.TokensRefresh.First(rt => rt.Token == refreshToken);
 
         if (!storedToken.IsActive)
-            throw new UnauthorizedAccessException("Refresh token is no longer active.");
+            return Result<UserAuthResDto>.Fail(AppErrors.AuthTokenInvalido());
 
         // Revoke the old token
         storedToken.RevokedAtUtc = DateTime.UtcNow;
 
-        return await BuildAndPersistTokenPairAsync(user, ct);
+        return Result<UserAuthResDto>.Ok(await BuildAndPersistTokenPairAsync(persona, ct));
     }
 
     /// <inheritdoc/>
     public async Task RevokeAsync(string refreshToken, CancellationToken ct = default)
     {
-        var user = await _users
-            .Find(u => u.RefreshTokens.Any(rt => rt.Token == refreshToken))
-            .FirstOrDefaultAsync(ct);
+        var filter = Builders<Persona>.Filter.ElemMatch(p => p.Usuario.TokensRefresh, rt => rt.Token == refreshToken);
+        var persona = await _personaRepository.FindOneAsync(filter, ct);
 
-        if (user is null)
+        if (persona is null)
             return;
 
-        var storedToken = user.RefreshTokens.FirstOrDefault(rt => rt.Token == refreshToken);
+        var storedToken = persona.Usuario.TokensRefresh.FirstOrDefault(rt => rt.Token == refreshToken);
         if (storedToken is null || !storedToken.IsActive)
             return;
 
         storedToken.RevokedAtUtc = DateTime.UtcNow;
 
-        await PersistUserAsync(user, ct);
-        _logger.LogInformation("Refresh token revoked for user {UserId}.", user.Id);
+        await PersistPersonaAsync(persona, ct);
+        _logger.LogInformation("Refresh token revoked for persona {PersonaId}.", persona.Id);
     }
 
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
 
-    private async Task<UserAuthResDto> BuildAndPersistTokenPairAsync(User user, CancellationToken ct)
+    private async Task<UserAuthResDto> BuildAndPersistTokenPairAsync(Persona persona, CancellationToken ct)
     {
         var expiry = DateTime.UtcNow.AddMinutes(_jwt.AccessTokenExpiryMinutes);
-        var accessToken = GenerateAccessToken(user);
+        var accessToken = GenerateAccessToken(persona);
         var rawRefresh = GenerateRefreshToken();
 
-        user.RefreshTokens.Add(new RefreshToken
+        persona.Usuario.TokensRefresh.Add(new RefreshToken
         {
             Token = rawRefresh,
             ExpiresAtUtc = DateTime.UtcNow.AddDays(_jwt.RefreshTokenExpiryDays),
             CreatedAtUtc = DateTime.UtcNow
         });
 
-        // Keep only the last 5 refresh tokens per user to avoid unbounded growth
-        user.RefreshTokens = user.RefreshTokens
+        // Keep only the last 5 refresh tokens per persona to avoid unbounded growth
+        persona.Usuario.TokensRefresh = persona.Usuario.TokensRefresh
             .OrderByDescending(rt => rt.CreatedAtUtc)
             .Take(5)
             .ToList();
 
-        await PersistUserAsync(user, ct);
+        await PersistPersonaAsync(persona, ct);
 
         return new UserAuthResDto
         {
@@ -156,10 +154,10 @@ public sealed class JwtService : IJwtService
         };
     }
 
-    private async Task PersistUserAsync(User user, CancellationToken ct)
+    private async Task PersistPersonaAsync(Persona persona, CancellationToken ct)
     {
-        var filter = Builders<User>.Filter.Eq(u => u.Id, user.Id);
-        var update = Builders<User>.Update.Set(u => u.RefreshTokens, user.RefreshTokens);
-        await _users.UpdateOneAsync(filter, update, cancellationToken: ct);
+        var filter = Builders<Persona>.Filter.Eq(p => p.Id, persona.Id);
+        var update = Builders<Persona>.Update.Set(p => p.Usuario.TokensRefresh, persona.Usuario.TokensRefresh);
+        await _personaRepository.UpdateOneAsync(filter, update, ct);
     }
 }

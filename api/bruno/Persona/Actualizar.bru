@@ -1,0 +1,39 @@
+meta {
+  name: Actualizar
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/persona/{{personaId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "primerNombre": "Ricardo",
+    "apellido": "González Pérez",
+    "identificacion": "001-0000001-1",
+    "tipoIdentificacion": "cedula",
+    "idMarket": 1,
+    "imagen": null,
+    "usuario": {
+      "nombreUsuario": "rgonzalez",
+      "contrasena": null,
+      "email": "rgonzalez@paybille.com",
+      "idRol": 1,
+      "activo": true,
+      "torning": null,
+      "master": false
+    }
+  }
+}

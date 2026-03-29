@@ -1,69 +1,86 @@
-using PayBille.Core.Models;
-using PayBille.Data.Repositories;
+// ── PayBille v2 Service Template ─────────────────────────────────────────────
+// Reglas:
+//   - Retornar Result<T>.Ok(valor) en éxito
+//   - Retornar Result<T>.Fail(AppErrors.XxxYyy()) en errores de dominio
+//   - NUNCA lanzar excepciones para errores esperados
+//   - Usar _dbContext convention en repositorios
+// ─────────────────────────────────────────────────────────────────────────────
+using MongoDB.Driver;
+using PayBille.Api.Common;
+using PayBille.Api.DTOs.{Entidad};
+using PayBille.Api.Errors;
+using PayBille.Api.Infrastructure.Repositories;
+using PayBille.Api.Interfaces;
+using PayBille.Api.Models;
 
-namespace PayBille.Services
+namespace PayBille.Api.Services;
+
+public sealed class {Entidad}Service : I{Entidad}Service
 {
-    public interface IItemService
+    private readonly {Entidad}Repository _{entidad}Repository;
+    private readonly ILogger<{Entidad}Service> _logger;
+
+    public {Entidad}Service({Entidad}Repository {entidad}Repository, ILogger<{Entidad}Service> logger)
     {
-        Task<ItemResponse> CreateItemAsync(CreateItemRequest request);
-        Task<ItemResponse> GetItemAsync(string id);
-        Task<IEnumerable<ItemResponse>> ListItemsAsync();
+        _{entidad}Repository = {entidad}Repository;
+        _logger              = logger;
     }
 
-    public class ItemService : IItemService
+    public async Task<Result<List<{Entidad}ResDto>>> ObtenerTodosAsync(CancellationToken ct)
     {
-        private readonly IItemRepository _repository;
-        private readonly ILogger<ItemService> _logger;
+        var items = await _{entidad}Repository.GetAllAsync(ct);
+        return Result<List<{Entidad}ResDto>>.Ok(items.ConvertAll(MapToDto));
+    }
 
-        public ItemService(IItemRepository repository, ILogger<ItemService> logger)
+    public async Task<Result<{Entidad}ResDto>> ObtenerPorIdAsync(string id, CancellationToken ct)
+    {
+        var filter = Builders<{Entidad}>.Filter.Eq(x => x.Id{Entidad}, id);
+        var item   = await _{entidad}Repository.FindOneAsync(filter, ct);
+        return item is null
+            ? Result<{Entidad}ResDto>.Fail(AppErrors.{Entidad}NoEncontrado(id))
+            : Result<{Entidad}ResDto>.Ok(MapToDto(item));
+    }
+
+    public async Task<Result<{Entidad}ResDto>> CrearAsync({Entidad}ReqDto request, CancellationToken ct)
+    {
+        var item = new {Entidad}
         {
-            _repository = repository;
-            _logger = logger;
-        }
-
-        public async Task<ItemResponse> CreateItemAsync(CreateItemRequest request)
-        {
-            try
-            {
-                var item = new Item 
-                { 
-                    Name = request.Name,
-                    Price = request.Price,
-                    Description = request.Description
-                };
-
-                var created = await _repository.AddAsync(item);
-                return MapToResponse(created);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating item");
-                throw;
-            }
-        }
-
-        public async Task<ItemResponse> GetItemAsync(string id)
-        {
-            var item = await _repository.GetByIdAsync(id);
-            if (item == null)
-                throw new KeyNotFoundException($"Item {id} not found");
-            
-            return MapToResponse(item);
-        }
-
-        public async Task<IEnumerable<ItemResponse>> ListItemsAsync()
-        {
-            var items = await _repository.GetAllAsync();
-            return items.Select(MapToResponse);
-        }
-
-        private ItemResponse MapToResponse(Item item) => new()
-        {
-            Id = item.Id,
-            Name = item.Name,
-            Price = item.Price,
-            Description = item.Description,
-            CreatedAt = item.CreatedAt
+            Id{Entidad}    = Guid.NewGuid().ToString(),
+            CreadoEnUtc    = DateTime.UtcNow,
+            // ... mapear campos del request
         };
+
+        await _{entidad}Repository.UpsertAsync(item, ct);
+        _logger.LogInformation("{Entidad} {Id} creado.", item.Id{Entidad});
+        return Result<{Entidad}ResDto>.Ok(MapToDto(item));
     }
+
+    public async Task<Result<{Entidad}ResDto>> ActualizarAsync(string id, {Entidad}ReqDto request, CancellationToken ct)
+    {
+        var filter    = Builders<{Entidad}>.Filter.Eq(x => x.Id{Entidad}, id);
+        var existente = await _{entidad}Repository.FindOneAsync(filter, ct);
+        if (existente is null)
+            return Result<{Entidad}ResDto>.Fail(AppErrors.{Entidad}NoEncontrado(id));
+
+        // ... actualizar campos
+        await _{entidad}Repository.UpsertAsync(existente, ct);
+        return Result<{Entidad}ResDto>.Ok(MapToDto(existente));
+    }
+
+    public async Task<Result<bool>> EliminarAsync(string id, CancellationToken ct)
+    {
+        var filter    = Builders<{Entidad}>.Filter.Eq(x => x.Id{Entidad}, id);
+        var eliminado = await _{entidad}Repository.DeleteOneAsync(filter, ct);
+        return eliminado
+            ? Result<bool>.Ok(true)
+            : Result<bool>.Fail(AppErrors.{Entidad}EliminarNoEncontrado(id));
+    }
+
+    // ── Mapping ───────────────────────────────────────────────────────────────
+
+    private static {Entidad}ResDto MapToDto({Entidad} x) => new()
+    {
+        Id{Entidad} = x.Id{Entidad},
+        // ... mapear campos
+    };
 }

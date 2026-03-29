@@ -1,0 +1,45 @@
+meta {
+  name: Crear
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/persona
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "primerNombre": "Ricardo",
+    "apellido": "González",
+    "identificacion": "001-0000001-1",
+    "tipoIdentificacion": "cedula",
+    "idMarket": 1,
+    "imagen": null,
+    "usuario": {
+      "nombreUsuario": "rgonzalez",
+      "contrasena": "Admin1234",
+      "email": "rgonzalez@paybille.com",
+      "idRol": 1,
+      "activo": true,
+      "torning": null,
+      "master": false
+    }
+  }
+}
+
+script:post-response {
+  if (res.body.code === "0") {
+    bru.setVar("personaId", res.body.data.idPersona);
+  }
+}

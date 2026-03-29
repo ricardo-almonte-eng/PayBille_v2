@@ -1,0 +1,15 @@
+meta {
+  name: Obtener Por Id
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/persona/{{personaId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
