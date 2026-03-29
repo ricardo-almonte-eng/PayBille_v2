@@ -3,7 +3,7 @@ namespace PayBille.Api.Errors;
 /// <summary>
 /// Catálogo de errores con códigos fijos y únicos por escenario.
 /// Cada código identifica exactamente el catch block de origen — búscalo aquí para rastrearlo.
-/// Esquema: [Controlador][Acción][Seq]  PE=Persona AU=Auth  G=GetAll I=GetById C=Create D=Delete L=Login R=Refresh O=Logout
+/// Esquema: [Controlador][Acción][Seq]  PE=Persona AU=Auth MA=Market  G=GetAll I=GetById C=Create D=Delete L=Login R=Refresh O=Logout
 /// </summary>
 public static class AppErrors
 {
@@ -70,6 +70,38 @@ public static class AppErrors
     /// <summary>AUA01 — Token JWT ausente, malformado o expirado (middleware).</summary>
     public static AppError AuthSinToken()
         => AppError.From("AUA01", "Necesitas iniciar sesión para acceder a este recurso.");
+
+    // ── Market · ObtenerTodos ────────────────────────────────────────────────
+    /// <summary>MAG01 — Error interno al listar markets.</summary>
+    public static AppError MarketListaErrorInterno()
+        => AppError.From("MAG01", "Ocurrió un error al obtener la lista de markets.");
+
+    // ── Market · ObtenerPorId ────────────────────────────────────────────────
+    /// <summary>MAI01 — No se encontró el market con el identificador especificado.</summary>
+    public static AppError MarketNoEncontrado(string id)
+        => AppError.From("MAI01", $"No encontramos el market con identificador {id}.");
+
+    /// <summary>MAI02 — Error interno al buscar un market por id.</summary>
+    public static AppError MarketBuscarErrorInterno()
+        => AppError.From("MAI02", "Ocurrió un error al buscar el market.");
+
+    // ── Market · CrearOActualizar ─────────────────────────────────────────────
+    /// <summary>MAC01 — Uno o más campos no pasaron la validación.</summary>
+    public static AppError MarketValidacionFallida(string detalle)
+        => AppError.From("MAC01", $"Los datos enviados no son válidos: {detalle}");
+
+    /// <summary>MAC02 — Error interno al guardar el market.</summary>
+    public static AppError MarketCrearErrorInterno()
+        => AppError.From("MAC02", "Ocurrió un error al guardar el market.");
+
+    // ── Market · Eliminar ─────────────────────────────────────────────────────
+    /// <summary>MAD01 — No se encontró el market a eliminar.</summary>
+    public static AppError MarketEliminarNoEncontrado(string id)
+        => AppError.From("MAD01", $"No encontramos el market con identificador {id} para eliminar.");
+
+    /// <summary>MAD02 — Error interno al eliminar el market.</summary>
+    public static AppError MarketEliminarErrorInterno()
+        => AppError.From("MAD02", "Ocurrió un error al eliminar el market.");
 
     // ── Global · Excepción no controlada (500) ────────────────────────────────
     /// <summary>APC01 — Error crítico no controlado capturado por GlobalExceptionHandler.</summary>
