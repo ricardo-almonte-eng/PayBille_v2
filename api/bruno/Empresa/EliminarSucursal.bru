@@ -1,0 +1,15 @@
+meta {
+  name: Eliminar Sucursal
+  type: http
+  seq: 9
+}
+
+delete {
+  url: {{baseUrl}}/api/empresa/{{empresaId}}/sucursales/{{sucursalId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

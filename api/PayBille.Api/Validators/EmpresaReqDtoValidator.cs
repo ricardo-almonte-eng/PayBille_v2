@@ -1,39 +1,39 @@
 using FluentValidation;
-using PayBille.Api.DTOs.Market;
+using PayBille.Api.DTOs.Empresa;
 
 namespace PayBille.Api.Validators;
 
 /// <summary>
-/// Valida los datos de entrada para crear o actualizar un market.
+/// Valida los datos de entrada para crear o actualizar una empresa.
 /// </summary>
-public sealed class MarketReqDtoValidator : AbstractValidator<MarketReqDto>
+public sealed class EmpresaReqDtoValidator : AbstractValidator<EmpresaReqDto>
 {
-    public MarketReqDtoValidator()
+    public EmpresaReqDtoValidator()
     {
-        RuleFor(x => x.Name)
+        RuleFor(x => x.Nombre)
             .NotEmpty()
-            .WithMessage("El nombre del market es requerido.")
+            .WithMessage("El nombre de la empresa es requerido.")
             .MaximumLength(200)
             .WithMessage("El nombre no puede superar los 200 caracteres.");
 
-        RuleFor(x => x.Address)
+        RuleFor(x => x.Direccion)
             .NotEmpty()
             .WithMessage("La dirección principal es requerida.")
             .MaximumLength(300)
             .WithMessage("La dirección no puede superar los 300 caracteres.");
 
-        RuleFor(x => x.IdOwner)
+        RuleFor(x => x.IdPropietario)
             .NotEmpty()
             .WithMessage("El identificador del propietario es requerido.");
 
-        When(x => !string.IsNullOrEmpty(x.Mail), () =>
+        When(x => !string.IsNullOrEmpty(x.Correo), () =>
         {
-            RuleFor(x => x.Mail)
+            RuleFor(x => x.Correo)
                 .EmailAddress()
                 .WithMessage("El formato del correo electrónico no es válido.");
         });
 
-        RuleFor(x => x.TaxValue)
+        RuleFor(x => x.ValorImpuesto)
             .GreaterThanOrEqualTo(0)
             .WithMessage("El valor de impuesto no puede ser negativo.")
             .LessThanOrEqualTo(100)

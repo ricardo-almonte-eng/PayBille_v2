@@ -1,0 +1,38 @@
+meta {
+  name: Actualizar
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/empresa/{{empresaId}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "nombre": "Mi Empresa Actualizada S.R.L.",
+    "activo": true,
+    "correo": "nuevo@miempresa.com",
+    "descripcion": "Descripción actualizada",
+    "enlaceCircular": null,
+    "direccion": "Av. Renovada #456",
+    "direccion2": "Suite 10",
+    "telefono": "809-555-0002",
+    "telefono2": null,
+    "idPropietario": "{{personaId}}",
+    "banco": "Banco BHD",
+    "imagen": null,
+    "rnc": "101-00001-1",
+    "valorImpuesto": 18
+  }
+}

@@ -25,7 +25,7 @@ public sealed class MongoDbInitializerService
         try
         {
             await InitializePersonasCollectionAsync(cancellationToken);
-            await InitializeMarketsCollectionAsync(cancellationToken);
+            await InitializeEmpresasCollectionAsync(cancellationToken);
             _logger.LogInformation("MongoDB initialization completed successfully.");
         }
         catch (Exception ex)
@@ -85,68 +85,68 @@ public sealed class MongoDbInitializerService
         }
     }
 
-    private async Task InitializeMarketsCollectionAsync(CancellationToken cancellationToken = default)
+    private async Task InitializeEmpresasCollectionAsync(CancellationToken cancellationToken = default)
     {
-        var marketsCollection = _context.Database.GetCollection<Market>("markets");
+        var empresasCollection = _context.Database.GetCollection<Empresa>("empresas");
 
-        // Create unique index on idMarket (business identifier)
-        var idMarketIndexModel = new CreateIndexModel<Market>(
-            Builders<Market>.IndexKeys.Ascending(m => m.IdMarket),
-            new CreateIndexOptions { Unique = true, Name = "idx_market_idMarket_unique" });
-
-        try
-        {
-            await marketsCollection.Indexes.CreateOneAsync(idMarketIndexModel, null, cancellationToken);
-            _logger.LogInformation("Created unique index on 'markets' collection for 'idMarket' field.");
-        }
-        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
-        {
-            _logger.LogInformation("Index already exists on markets.idMarket");
-        }
-
-        // Create index on name for search
-        var nameIndexModel = new CreateIndexModel<Market>(
-            Builders<Market>.IndexKeys.Ascending(m => m.Name),
-            new CreateIndexOptions { Name = "idx_market_name" });
+        // Índice único en idEmpresa (identificador de negocio)
+        var idEmpresaIndexModel = new CreateIndexModel<Empresa>(
+            Builders<Empresa>.IndexKeys.Ascending(e => e.IdEmpresa),
+            new CreateIndexOptions { Unique = true, Name = "idx_empresa_idEmpresa_unique" });
 
         try
         {
-            await marketsCollection.Indexes.CreateOneAsync(nameIndexModel, null, cancellationToken);
-            _logger.LogInformation("Created index on 'markets' collection for 'name' field.");
+            await empresasCollection.Indexes.CreateOneAsync(idEmpresaIndexModel, null, cancellationToken);
+            _logger.LogInformation("Created unique index on 'empresas' collection for 'idEmpresa' field.");
         }
         catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
         {
-            _logger.LogInformation("Index already exists on markets.name");
+            _logger.LogInformation("Index already exists on empresas.idEmpresa");
         }
 
-        // Create index on active for filtering active markets
-        var activeIndexModel = new CreateIndexModel<Market>(
-            Builders<Market>.IndexKeys.Ascending(m => m.Active),
-            new CreateIndexOptions { Name = "idx_market_active" });
+        // Índice en nombre para búsquedas
+        var nombreIndexModel = new CreateIndexModel<Empresa>(
+            Builders<Empresa>.IndexKeys.Ascending(e => e.Nombre),
+            new CreateIndexOptions { Name = "idx_empresa_nombre" });
 
         try
         {
-            await marketsCollection.Indexes.CreateOneAsync(activeIndexModel, null, cancellationToken);
-            _logger.LogInformation("Created index on 'markets' collection for 'active' field.");
+            await empresasCollection.Indexes.CreateOneAsync(nombreIndexModel, null, cancellationToken);
+            _logger.LogInformation("Created index on 'empresas' collection for 'nombre' field.");
         }
         catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
         {
-            _logger.LogInformation("Index already exists on markets.active");
+            _logger.LogInformation("Index already exists on empresas.nombre");
         }
 
-        // Create index on creadoEnUtc for sorting
-        var creadoEnIndexModel = new CreateIndexModel<Market>(
-            Builders<Market>.IndexKeys.Descending(m => m.CreadoEnUtc),
-            new CreateIndexOptions { Name = "idx_market_creadoEnUtc" });
+        // Índice en activo para filtrar empresas activas
+        var activoIndexModel = new CreateIndexModel<Empresa>(
+            Builders<Empresa>.IndexKeys.Ascending(e => e.Activo),
+            new CreateIndexOptions { Name = "idx_empresa_activo" });
 
         try
         {
-            await marketsCollection.Indexes.CreateOneAsync(creadoEnIndexModel, null, cancellationToken);
-            _logger.LogInformation("Created index on 'markets' collection for 'creadoEnUtc' field.");
+            await empresasCollection.Indexes.CreateOneAsync(activoIndexModel, null, cancellationToken);
+            _logger.LogInformation("Created index on 'empresas' collection for 'activo' field.");
         }
         catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
         {
-            _logger.LogInformation("Index already exists on markets.creadoEnUtc");
+            _logger.LogInformation("Index already exists on empresas.activo");
+        }
+
+        // Índice en creadoEnUtc para ordenamiento
+        var creadoEnIndexModel = new CreateIndexModel<Empresa>(
+            Builders<Empresa>.IndexKeys.Descending(e => e.CreadoEnUtc),
+            new CreateIndexOptions { Name = "idx_empresa_creadoEnUtc" });
+
+        try
+        {
+            await empresasCollection.Indexes.CreateOneAsync(creadoEnIndexModel, null, cancellationToken);
+            _logger.LogInformation("Created index on 'empresas' collection for 'creadoEnUtc' field.");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on empresas.creadoEnUtc");
         }
     }
 }

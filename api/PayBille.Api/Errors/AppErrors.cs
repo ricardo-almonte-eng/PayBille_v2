@@ -3,7 +3,7 @@ namespace PayBille.Api.Errors;
 /// <summary>
 /// Catálogo de errores con códigos fijos y únicos por escenario.
 /// Cada código identifica exactamente el catch block de origen — búscalo aquí para rastrearlo.
-/// Esquema: [Controlador][Acción][Seq]  PE=Persona AU=Auth MA=Market IM=Imagen  G=GetAll I=GetById C=Create D=Delete L=Login R=Refresh O=Logout S=Subir U=UpdateImagen
+/// Esquema: [Controlador][Acción][Seq]  PE=Persona AU=Auth EM=Empresa IM=Imagen  G=GetAll I=GetById C=Create D=Delete L=Login R=Refresh O=Logout S=Subir U=UpdateImagen A=AgregarSucursal E=ActualizarEstatus
 /// </summary>
 public static class AppErrors
 {
@@ -71,38 +71,6 @@ public static class AppErrors
     public static AppError AuthSinToken()
         => AppError.From("AUA01", "Necesitas iniciar sesión para acceder a este recurso.");
 
-    // ── Market · ObtenerTodos ────────────────────────────────────────────────
-    /// <summary>MAG01 — Error interno al listar markets.</summary>
-    public static AppError MarketListaErrorInterno()
-        => AppError.From("MAG01", "Ocurrió un error al obtener la lista de markets.");
-
-    // ── Market · ObtenerPorId ────────────────────────────────────────────────
-    /// <summary>MAI01 — No se encontró el market con el identificador especificado.</summary>
-    public static AppError MarketNoEncontrado(string id)
-        => AppError.From("MAI01", $"No encontramos el market con identificador {id}.");
-
-    /// <summary>MAI02 — Error interno al buscar un market por id.</summary>
-    public static AppError MarketBuscarErrorInterno()
-        => AppError.From("MAI02", "Ocurrió un error al buscar el market.");
-
-    // ── Market · CrearOActualizar ─────────────────────────────────────────────
-    /// <summary>MAC01 — Uno o más campos no pasaron la validación.</summary>
-    public static AppError MarketValidacionFallida(string detalle)
-        => AppError.From("MAC01", $"Los datos enviados no son válidos: {detalle}");
-
-    /// <summary>MAC02 — Error interno al guardar el market.</summary>
-    public static AppError MarketCrearErrorInterno()
-        => AppError.From("MAC02", "Ocurrió un error al guardar el market.");
-
-    // ── Market · Eliminar ─────────────────────────────────────────────────────
-    /// <summary>MAD01 — No se encontró el market a eliminar.</summary>
-    public static AppError MarketEliminarNoEncontrado(string id)
-        => AppError.From("MAD01", $"No encontramos el market con identificador {id} para eliminar.");
-
-    /// <summary>MAD02 — Error interno al eliminar el market.</summary>
-    public static AppError MarketEliminarErrorInterno()
-        => AppError.From("MAD02", "Ocurrió un error al eliminar el market.");
-
     // ── Imagen · Subir ────────────────────────────────────────────────────────
     /// <summary>IMS01 — No se proporcionó ningún archivo o está vacío.</summary>
     public static AppError ImagenArchivoRequerido()
@@ -120,10 +88,61 @@ public static class AppErrors
     public static AppError ImagenGuardarErrorInterno()
         => AppError.From("IMS04", "Ocurrió un error al guardar la imagen en el servidor.");
 
-    // ── Market · ActualizarImagen ─────────────────────────────────────────────
-    /// <summary>MAU01 — No se encontró el market al intentar actualizar su imagen.</summary>
-    public static AppError MarketImagenNoEncontrado(string id)
-        => AppError.From("MAU01", $"No encontramos el market con identificador {id} para actualizar su imagen.");
+    // ── Empresa · ObtenerTodos ───────────────────────────────────────────────
+    /// <summary>EMG01 — Error interno al listar empresas.</summary>
+    public static AppError EmpresaListaErrorInterno()
+        => AppError.From("EMG01", "Ocurrió un error al obtener la lista de empresas.");
+
+    // ── Empresa · ObtenerPorId ───────────────────────────────────────────────
+    /// <summary>EMI01 — No se encontró la empresa con el identificador especificado.</summary>
+    public static AppError EmpresaNoEncontrada(string id)
+        => AppError.From("EMI01", $"No encontramos la empresa con identificador {id}.");
+
+    /// <summary>EMI02 — Error interno al buscar una empresa por id.</summary>
+    public static AppError EmpresaBuscarErrorInterno()
+        => AppError.From("EMI02", "Ocurrió un error al buscar la empresa.");
+
+    // ── Empresa · CrearOActualizar ────────────────────────────────────────────
+    /// <summary>EMC01 — Uno o más campos no pasaron la validación.</summary>
+    public static AppError EmpresaValidacionFallida(string detalle)
+        => AppError.From("EMC01", $"Los datos enviados no son válidos: {detalle}");
+
+    /// <summary>EMC02 — Error interno al guardar la empresa.</summary>
+    public static AppError EmpresaCrearErrorInterno()
+        => AppError.From("EMC02", "Ocurrió un error al guardar la empresa.");
+
+    // ── Empresa · Eliminar ────────────────────────────────────────────────────
+    /// <summary>EMD01 — No se encontró la empresa a eliminar.</summary>
+    public static AppError EmpresaEliminarNoEncontrada(string id)
+        => AppError.From("EMD01", $"No encontramos la empresa con identificador {id} para eliminar.");
+
+    /// <summary>EMD02 — Error interno al eliminar la empresa.</summary>
+    public static AppError EmpresaEliminarErrorInterno()
+        => AppError.From("EMD02", "Ocurrió un error al eliminar la empresa.");
+
+    // ── Empresa · ActualizarImagen ────────────────────────────────────────────
+    /// <summary>EMU01 — No se encontró la empresa al intentar actualizar su imagen.</summary>
+    public static AppError EmpresaImagenNoEncontrada(string id)
+        => AppError.From("EMU01", $"No encontramos la empresa con identificador {id} para actualizar su imagen.");
+
+    // ── Empresa · AgregarSucursal ─────────────────────────────────────────────
+    /// <summary>EMA01 — Uno o más campos de la sucursal no pasaron la validación.</summary>
+    public static AppError SucursalValidacionFallida(string detalle)
+        => AppError.From("EMA01", $"Los datos de la sucursal no son válidos: {detalle}");
+
+    // ── Empresa · ActualizarEstatusSucursal ───────────────────────────────────
+    /// <summary>EME01 — El estatus enviado no es un valor válido.</summary>
+    public static AppError SucursalEstatusValidacionFallida(string detalle)
+        => AppError.From("EME01", $"El estatus de la sucursal no es válido: {detalle}");
+
+    /// <summary>EME02 — No se encontró la sucursal al actualizar su estatus.</summary>
+    public static AppError SucursalNoEncontrada(string idSucursal)
+        => AppError.From("EME02", $"No encontramos la sucursal con identificador {idSucursal}.");
+
+    // ── Empresa · EliminarSucursal ────────────────────────────────────────────
+    /// <summary>EMS01 — No se encontró la sucursal a eliminar.</summary>
+    public static AppError SucursalEliminarNoEncontrada(string idSucursal)
+        => AppError.From("EMS01", $"No encontramos la sucursal con identificador {idSucursal} para eliminar.");
 
     // ── Persona · ActualizarImagen ────────────────────────────────────────────
     /// <summary>PEU01 — No se encontró la persona al intentar actualizar su imagen.</summary>
