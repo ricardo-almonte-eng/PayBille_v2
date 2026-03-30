@@ -1,0 +1,44 @@
+meta {
+  name: Crear
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/empresa
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "nombre": "Mi Empresa S.R.L.",
+    "activo": true,
+    "correo": "contacto@miempresa.com",
+    "descripcion": "Empresa de ejemplo",
+    "enlaceCircular": null,
+    "direccion": "Av. Principal #123",
+    "direccion2": null,
+    "telefono": "809-555-0001",
+    "telefono2": null,
+    "idPropietario": "{{personaId}}",
+    "banco": "Banco Popular",
+    "imagen": null,
+    "rnc": "101-00001-1",
+    "valorImpuesto": 18
+  }
+}
+
+script:post-response {
+  if (res.body.code === "0") {
+    bru.setVar("empresaId", res.body.data.idEmpresa);
+  }
+}

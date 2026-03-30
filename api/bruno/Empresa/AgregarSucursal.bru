@@ -1,0 +1,36 @@
+meta {
+  name: Agregar Sucursal
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/empresa/{{empresaId}}/sucursales
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "nombre": "Sucursal Centro",
+    "direccion": "Calle Central #10",
+    "direccion2": null,
+    "telefono": "809-555-1001",
+    "correo": "centro@miempresa.com"
+  }
+}
+
+script:post-response {
+  if (res.body.code === "0" && res.body.data.sucursales.length > 0) {
+    const sucursales = res.body.data.sucursales;
+    bru.setVar("sucursalId", sucursales[sucursales.length - 1].idSucursal);
+  }
+}

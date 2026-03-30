@@ -25,10 +25,11 @@ api/
 ├── PayBille.Api/
 │   ├── Common/              # Result<T>
 │   ├── Configuration/       # JwtSettings, MongoDbSettings
-│   ├── Controllers/         # AuthController, PersonaController, HealthController
+│   ├── Controllers/         # AuthController, PersonaController, EmpresaController, HealthController
 │   ├── DTOs/
 │   │   ├── ApiRespDto.cs    # Wrapper genérico de respuesta
 │   │   ├── Auth/            # UserLoginReqDto, UserRefreshTokenReqDto, UserAuthResDto
+│   │   ├── Empresa/         # EmpresaReqDto, EmpresaResDto, SucursalReqDto, SucursalResDto, ActualizarEstatusSucursalReqDto
 │   │   └── Persona/         # PersonaReqDto, PersonaResDto
 │   ├── Errors/              # AppError, AppErrors (catálogo estático)
 │   ├── Infrastructure/
@@ -36,17 +37,22 @@ api/
 │   │   ├── IMongoRepository.cs
 │   │   ├── MongoDbContext.cs
 │   │   ├── MongoRepository.cs
-│   │   ├── Repositories/    # PersonaRepository
+│   │   ├── Repositories/    # PersonaRepository, EmpresaRepository
 │   │   └── Services/        # MongoDbInitializerService
-│   ├── Interfaces/          # IJwtService, IPersonaService, IHealthService
-│   ├── Models/              # Persona, UsuarioPersona, RefreshToken
-│   ├── Services/            # JwtService, PersonaService, HealthService
-│   ├── Validators/          # PersonaReqDtoValidator, UserLoginReqDtoValidator
+│   ├── Interfaces/          # IJwtService, IPersonaService, IEmpresaService, IHealthService
+│   ├── Models/
+│   │   ├── Enums/           # EstatusSucursal
+│   │   ├── Empresa.cs       # Empresa + Sucursal (subdocumento)
+│   │   ├── Persona.cs
+│   │   └── RefreshToken.cs
+│   ├── Services/            # JwtService, PersonaService, EmpresaService, HealthService
+│   ├── Validators/          # PersonaReqDtoValidator, EmpresaReqDtoValidator, SucursalReqDtoValidator, ActualizarEstatusSucursalReqDtoValidator
 │   └── Program.cs
 └── bruno/
     ├── bruno.json
     ├── environments/dev.bru
     ├── Auth/
+    ├── Empresa/
     ├── Health/
     └── Persona/
 ```
@@ -151,6 +157,7 @@ Esquema de códigos: `[Prefijo Controlador][Prefijo Acción][Seq]`
 |---|---|
 | `PE` | Persona |
 | `AU` | Auth |
+| `EM` | Empresa |
 | `AP` | Aplicación/Global |
 | `G` | GetAll |
 | `I` | GetById |
@@ -159,8 +166,10 @@ Esquema de códigos: `[Prefijo Controlador][Prefijo Acción][Seq]`
 | `L` | Login |
 | `R` | Refresh |
 | `O` | Logout |
-| `A` | Auth challenge |
-| `C` | Critical (global) |
+| `A` | Auth challenge / AgregarSucursal |
+| `E` | ActualizarEstatusSucursal |
+| `S` | EliminarSucursal / Subir imagen |
+| `U` | UpdateImagen |
 
 **Agregar un error nuevo:**
 ```csharp
@@ -190,6 +199,18 @@ public static AppError NombreDescriptivo()
 | AUR02 | `AuthRefreshErrorInterno` | Error interno al refrescar |
 | AUO01 | `AuthLogoutErrorInterno` | Error interno al logout |
 | AUA01 | `AuthSinToken` | JWT challenge 401 |
+| EMG01 | `EmpresaListaErrorInterno` | Error interno al listar empresas |
+| EMI01 | `EmpresaNoEncontrada(string id)` | Empresa no encontrada |
+| EMI02 | `EmpresaBuscarErrorInterno` | Error interno al buscar empresa |
+| EMC01 | `EmpresaValidacionFallida(string detalle)` | Validación fallida empresa |
+| EMC02 | `EmpresaCrearErrorInterno` | Error interno al guardar empresa |
+| EMD01 | `EmpresaEliminarNoEncontrada(string id)` | Empresa no encontrada al eliminar |
+| EMD02 | `EmpresaEliminarErrorInterno` | Error interno al eliminar empresa |
+| EMU01 | `EmpresaImagenNoEncontrada(string id)` | Empresa no encontrada al actualizar imagen |
+| EMA01 | `SucursalValidacionFallida(string detalle)` | Validación fallida al agregar sucursal |
+| EME01 | `SucursalEstatusValidacionFallida(string detalle)` | Estatus de sucursal inválido |
+| EME02 | `SucursalNoEncontrada(string id)` | Sucursal no encontrada al actualizar estatus |
+| EMS01 | `SucursalEliminarNoEncontrada(string id)` | Sucursal no encontrada al eliminar |
 | APC01 | `ErrorCriticoInterno` | Excepción no controlada 500 |
 
 ---
@@ -239,8 +260,40 @@ UsuarioPersona {
 }
 ```
 
-### Inicialización de Índices
-Siempre crear/verificar índices en `MongoDbInitializerService.InitializeAsync()`.
+### Empresa (colección: `empresas`)
+```csharp
+Empresa {
+    Id: string (ObjectId, BsonId)
+    IdEmpresa: string (GUID, unique index)
+    Nombre: string (required)
+    Activo: bool
+    Correo: string?
+    Descripcion: string?
+    EnlaceCircular: string?
+    Direccion: string (required)
+    Direccion2: string?
+    Telefono: string?
+    Telefono2: string?
+    IdPropietario: string (required)
+    Banco: string?
+    Imagen: string?
+    RNC: string?
+    ValorImpuesto: decimal
+    Sucursales: List<Sucursal> (subdocumento)
+    CreadoEnUtc: DateTime
+}
+
+Sucursal {
+    IdSucursal: string (GUID, generado en servidor)
+    Nombre: string (required)
+    Direccion: string (required)
+    Direccion2: string?
+    Telefono: string?
+    Correo: string?
+    Estatus: EstatusSucursal (Abierta=1, Cerrada=2, Bloqueada=3)
+    CreadoEnUtc: DateTime
+}
+```
 
 ---
 
@@ -262,7 +315,18 @@ Siempre crear/verificar índices en `MongoDbInitializerService.InitializeAsync()
 | PUT | `/{id}` | Actualiza persona existente |
 | DELETE | `/{id}` | Elimina persona |
 
-### Health (`/api/health`) — público
+### Empresa (`/api/empresa`) — requiere JWT
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/` | Lista todas las empresas |
+| GET | `/{id}` | Obtiene una empresa por GUID |
+| POST | `/` | Crea empresa nueva (GUID generado en servidor) |
+| PUT | `/{id}` | Actualiza empresa existente |
+| DELETE | `/{id}` | Elimina empresa |
+| POST | `/{id}/imagen` | Sube/actualiza imagen de la empresa |
+| POST | `/{id}/sucursales` | Agrega sucursal a la empresa |
+| PUT | `/{id}/sucursales/{idSucursal}/estatus` | Actualiza estatus de sucursal (Abierta/Cerrada/Bloqueada) |
+| DELETE | `/{id}/sucursales/{idSucursal}` | Elimina sucursal de la empresa |
 | Método | Ruta | Descripción |
 |---|---|---|
 | GET | `/` | Estado de salud del servicio |
@@ -277,7 +341,9 @@ Variables de entorno (`dev`):
 - `baseUrl` = `http://localhost:5000`
 - `accessToken` — se llena automáticamente al ejecutar Login
 - `refreshToken` — se llena automáticamente al ejecutar Login
-- `personaId` — se llena automáticamente al ejecutar Crear
+- `personaId` — se llena automáticamente al ejecutar Crear (Persona)
+- `empresaId` — se llena automáticamente al ejecutar Crear (Empresa)
+- `sucursalId` — se llena automáticamente al ejecutar Agregar Sucursal
 
 Los scripts `post-response` en Login y Crear propagan las variables automáticamente.
 

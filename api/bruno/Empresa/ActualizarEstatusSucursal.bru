@@ -1,0 +1,25 @@
+meta {
+  name: Actualizar Estatus Sucursal
+  type: http
+  seq: 8
+}
+
+put {
+  url: {{baseUrl}}/api/empresa/{{empresaId}}/sucursales/{{sucursalId}}/estatus
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "estatus": 2
+  }
+}
