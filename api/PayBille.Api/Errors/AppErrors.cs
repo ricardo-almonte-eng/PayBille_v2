@@ -3,7 +3,7 @@ namespace PayBille.Api.Errors;
 /// <summary>
 /// Catálogo de errores con códigos fijos y únicos por escenario.
 /// Cada código identifica exactamente el catch block de origen — búscalo aquí para rastrearlo.
-/// Esquema: [Controlador][Acción][Seq]  PE=Persona AU=Auth MA=Market  G=GetAll I=GetById C=Create D=Delete L=Login R=Refresh O=Logout
+/// Esquema: [Controlador][Acción][Seq]  PE=Persona AU=Auth MA=Market IM=Imagen  G=GetAll I=GetById C=Create D=Delete L=Login R=Refresh O=Logout S=Subir U=UpdateImagen
 /// </summary>
 public static class AppErrors
 {
@@ -102,6 +102,33 @@ public static class AppErrors
     /// <summary>MAD02 — Error interno al eliminar el market.</summary>
     public static AppError MarketEliminarErrorInterno()
         => AppError.From("MAD02", "Ocurrió un error al eliminar el market.");
+
+    // ── Imagen · Subir ────────────────────────────────────────────────────────
+    /// <summary>IMS01 — No se proporcionó ningún archivo o está vacío.</summary>
+    public static AppError ImagenArchivoRequerido()
+        => AppError.From("IMS01", "Debes proporcionar un archivo de imagen.");
+
+    /// <summary>IMS02 — El tipo MIME del archivo no está entre los permitidos.</summary>
+    public static AppError ImagenTipoNoPermitido(string tipo)
+        => AppError.From("IMS02", $"El tipo de archivo '{tipo}' no está permitido. Usa JPEG, PNG, WebP o GIF.");
+
+    /// <summary>IMS03 — El archivo supera el tamaño máximo configurado.</summary>
+    public static AppError ImagenTamanoExcedido(long maxBytes)
+        => AppError.From("IMS03", $"El archivo supera el tamaño máximo permitido de {maxBytes / 1024 / 1024} MB.");
+
+    /// <summary>IMS04 — Error de I/O al intentar guardar el archivo en disco.</summary>
+    public static AppError ImagenGuardarErrorInterno()
+        => AppError.From("IMS04", "Ocurrió un error al guardar la imagen en el servidor.");
+
+    // ── Market · ActualizarImagen ─────────────────────────────────────────────
+    /// <summary>MAU01 — No se encontró el market al intentar actualizar su imagen.</summary>
+    public static AppError MarketImagenNoEncontrado(string id)
+        => AppError.From("MAU01", $"No encontramos el market con identificador {id} para actualizar su imagen.");
+
+    // ── Persona · ActualizarImagen ────────────────────────────────────────────
+    /// <summary>PEU01 — No se encontró la persona al intentar actualizar su imagen.</summary>
+    public static AppError PersonaImagenNoEncontrada(string id)
+        => AppError.From("PEU01", $"No encontramos a la persona con identificador {id} para actualizar su imagen.");
 
     // ── Global · Excepción no controlada (500) ────────────────────────────────
     /// <summary>APC01 — Error crítico no controlado capturado por GlobalExceptionHandler.</summary>

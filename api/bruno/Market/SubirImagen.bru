@@ -1,0 +1,19 @@
+meta {
+  name: Subir Imagen
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/market/{{marketId}}/imagen
+  body: multipart-form
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:multipart-form {
+  archivo: @file()
+}

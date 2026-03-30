@@ -106,6 +106,21 @@ public sealed class PersonaService : IPersonaService
             : Result<bool>.Fail(AppErrors.PersonaEliminarNoEncontrada(idPersona));
     }
 
+    /// <inheritdoc/>
+    public async Task<Result<bool>> ActualizarImagenAsync(string idPersona, string urlImagen, CancellationToken ct)
+    {
+        var filter    = Builders<Persona>.Filter.Eq(p => p.IdPersona, idPersona);
+        var existente = await _personaRepository.FindOneAsync(filter, ct);
+        if (existente is null)
+            return Result<bool>.Fail(AppErrors.PersonaImagenNoEncontrada(idPersona));
+
+        existente.Imagen = urlImagen;
+        await _personaRepository.UpsertAsync(existente, ct);
+
+        _logger.LogInformation("Imagen de la persona {IdPersona} actualizada a {Url}.", idPersona, urlImagen);
+        return Result<bool>.Ok(true);
+    }
+
     // ── Mapping ──────────────────────────────────────────────────────────────
 
     private static PersonaResDto MapToDto(Persona p) => new()

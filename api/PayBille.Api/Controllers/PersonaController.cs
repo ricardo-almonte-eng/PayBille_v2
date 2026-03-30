@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PayBille.Api.DTOs;
+using PayBille.Api.DTOs.Imagen;
 using PayBille.Api.DTOs.Persona;
 using PayBille.Api.Errors;
 using PayBille.Api.Interfaces;
@@ -14,11 +15,16 @@ namespace PayBille.Api.Controllers;
 public sealed class PersonaController : ControllerBase
 {
     private readonly IPersonaService _personaService;
+    private readonly IImagenService _imagenService;
     private readonly IValidator<PersonaReqDto> _validator;
 
-    public PersonaController(IPersonaService personaService, IValidator<PersonaReqDto> validator)
+    public PersonaController(
+        IPersonaService personaService,
+        IImagenService imagenService,
+        IValidator<PersonaReqDto> validator)
     {
         _personaService = personaService;
+        _imagenService  = imagenService;
         _validator      = validator;
     }
 
@@ -104,5 +110,26 @@ public sealed class PersonaController : ControllerBase
         return Ok(result.IsSuccess
             ? ApiRespDto<bool>.Ok(true)
             : ApiRespDto<bool>.Error(result.Error!));
+    }
+
+    /// <summary>
+    /// Sube y asocia una imagen de perfil a la persona indicada por IdPersona.
+    /// El archivo debe enviarse como multipart/form-data en el campo "archivo".
+    /// </summary>
+    [HttpPost("{id}/imagen")]
+    [ProducesResponseType(typeof(ApiRespDto<ImagenResDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> SubirImagen(
+        string id,
+        IFormFile archivo,
+        CancellationToken cancellationToken)
+    {
+        var resultImagen = await _imagenService.SubirAsync(archivo, "personas", cancellationToken);
+        if (!resultImagen.IsSuccess)
+            return Ok(ApiRespDto<ImagenResDto>.Error(resultImagen.Error!));
+
+        var resultActualizar = await _personaService.ActualizarImagenAsync(id, resultImagen.Value!.Url, cancellationToken);
+        return Ok(resultActualizar.IsSuccess
+            ? ApiRespDto<ImagenResDto>.Ok(resultImagen.Value!)
+            : ApiRespDto<ImagenResDto>.Error(resultActualizar.Error!));
     }
 }

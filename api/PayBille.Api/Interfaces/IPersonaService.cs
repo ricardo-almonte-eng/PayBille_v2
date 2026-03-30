@@ -25,4 +25,10 @@ public interface IPersonaService
     /// Returns Fail(PED01) si no existía.
     /// </summary>
     Task<Result<bool>> EliminarAsync(string idPersona, CancellationToken ct);
+
+    /// <summary>
+    /// Actualiza el campo imagen de la persona con la URL proporcionada.
+    /// Returns Fail(PEU01) si la persona no existe.
+    /// </summary>
+    Task<Result<bool>> ActualizarImagenAsync(string idPersona, string urlImagen, CancellationToken ct);
 }
