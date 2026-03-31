@@ -1,5 +1,6 @@
 using MongoDB.Driver;
 using PayBille.Api.Models;
+using PayBille.Api.Models.Enums;
 
 namespace PayBille.Api.Infrastructure.Services;
 
@@ -29,6 +30,9 @@ public sealed class MongoDbInitializerService
             await InitializeVentasCollectionAsync(cancellationToken);
             await InitializeTurnosCollectionAsync(cancellationToken);
             await InitializeResumenesDiariosCollectionAsync(cancellationToken);
+            await InitializeBancosCollectionAsync(cancellationToken);
+            await InitializeCuentasBancariasCollectionAsync(cancellationToken);
+            await InitializeMovimientosBancariosCollectionAsync(cancellationToken);
             await SeedUsuarioAdminAsync(cancellationToken);
             _logger.LogInformation("MongoDB initialization completed successfully.");
         }
@@ -309,6 +313,171 @@ public sealed class MongoDbInitializerService
         catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
         {
             _logger.LogInformation("Index already exists on resumenesDiarios.fecha");
+        }
+    }
+
+    private async Task InitializeBancosCollectionAsync(CancellationToken cancellationToken = default)
+    {
+        var bancosCollection = _context.Database.GetCollection<Banco>("bancos");
+
+        // Índice único en idBanco (identificador de negocio)
+        var idBancoIndex = new CreateIndexModel<Banco>(
+            Builders<Banco>.IndexKeys.Ascending(b => b.IdBanco),
+            new CreateIndexOptions { Unique = true, Name = "idx_banco_idBanco_unique" });
+
+        try
+        {
+            await bancosCollection.Indexes.CreateOneAsync(idBancoIndex, null, cancellationToken);
+            _logger.LogInformation("Created unique index on 'bancos' collection for 'idBanco' field.");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on bancos.idBanco");
+        }
+
+        // Índice en nombre para búsquedas
+        var nombreIndex = new CreateIndexModel<Banco>(
+            Builders<Banco>.IndexKeys.Ascending(b => b.Nombre),
+            new CreateIndexOptions { Name = "idx_banco_nombre" });
+
+        try
+        {
+            await bancosCollection.Indexes.CreateOneAsync(nombreIndex, null, cancellationToken);
+            _logger.LogInformation("Created index on 'bancos' collection for 'nombre' field.");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on bancos.nombre");
+        }
+
+        // Índice en activo para filtrar bancos activos
+        var activoIndex = new CreateIndexModel<Banco>(
+            Builders<Banco>.IndexKeys.Ascending(b => b.Activo),
+            new CreateIndexOptions { Name = "idx_banco_activo" });
+
+        try
+        {
+            await bancosCollection.Indexes.CreateOneAsync(activoIndex, null, cancellationToken);
+            _logger.LogInformation("Created index on 'bancos' collection for 'activo' field.");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on bancos.activo");
+        }
+    }
+
+    private async Task InitializeCuentasBancariasCollectionAsync(CancellationToken cancellationToken = default)
+    {
+        var cuentasCollection = _context.Database.GetCollection<CuentaBancaria>("cuentasBancarias");
+
+        // Índice único en idCuentaBancaria
+        var idCuentaIndex = new CreateIndexModel<CuentaBancaria>(
+            Builders<CuentaBancaria>.IndexKeys.Ascending(c => c.IdCuentaBancaria),
+            new CreateIndexOptions { Unique = true, Name = "idx_cuentaBancaria_idCuentaBancaria_unique" });
+
+        try
+        {
+            await cuentasCollection.Indexes.CreateOneAsync(idCuentaIndex, null, cancellationToken);
+            _logger.LogInformation("Created unique index on 'cuentasBancarias' for 'idCuentaBancaria' field.");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on cuentasBancarias.idCuentaBancaria");
+        }
+
+        // Índice en idEmpresa para consultas por empresa
+        var idEmpresaIndex = new CreateIndexModel<CuentaBancaria>(
+            Builders<CuentaBancaria>.IndexKeys.Ascending(c => c.IdEmpresa),
+            new CreateIndexOptions { Name = "idx_cuentaBancaria_idEmpresa" });
+
+        try
+        {
+            await cuentasCollection.Indexes.CreateOneAsync(idEmpresaIndex, null, cancellationToken);
+            _logger.LogInformation("Created index on 'cuentasBancarias' for 'idEmpresa' field.");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on cuentasBancarias.idEmpresa");
+        }
+
+        // Índice en idBanco para consultas por banco
+        var idBancoIndex = new CreateIndexModel<CuentaBancaria>(
+            Builders<CuentaBancaria>.IndexKeys.Ascending(c => c.IdBanco),
+            new CreateIndexOptions { Name = "idx_cuentaBancaria_idBanco" });
+
+        try
+        {
+            await cuentasCollection.Indexes.CreateOneAsync(idBancoIndex, null, cancellationToken);
+            _logger.LogInformation("Created index on 'cuentasBancarias' for 'idBanco' field.");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on cuentasBancarias.idBanco");
+        }
+    }
+
+    private async Task InitializeMovimientosBancariosCollectionAsync(CancellationToken cancellationToken = default)
+    {
+        var movimientosCollection = _context.Database.GetCollection<MovimientoBancario>("movimientosBancarios");
+
+        // Índice único en idMovimientoBancario
+        var idMovimientoIndex = new CreateIndexModel<MovimientoBancario>(
+            Builders<MovimientoBancario>.IndexKeys.Ascending(m => m.IdMovimientoBancario),
+            new CreateIndexOptions { Unique = true, Name = "idx_movimientoBancario_id_unique" });
+
+        try
+        {
+            await movimientosCollection.Indexes.CreateOneAsync(idMovimientoIndex, null, cancellationToken);
+            _logger.LogInformation("Created unique index on 'movimientosBancarios' for 'idMovimientoBancario' field.");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on movimientosBancarios.idMovimientoBancario");
+        }
+
+        // Índice en idCuentaBancaria para consultas por cuenta
+        var idCuentaIndex = new CreateIndexModel<MovimientoBancario>(
+            Builders<MovimientoBancario>.IndexKeys.Ascending(m => m.IdCuentaBancaria),
+            new CreateIndexOptions { Name = "idx_movimientoBancario_idCuentaBancaria" });
+
+        try
+        {
+            await movimientosCollection.Indexes.CreateOneAsync(idCuentaIndex, null, cancellationToken);
+            _logger.LogInformation("Created index on 'movimientosBancarios' for 'idCuentaBancaria' field.");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on movimientosBancarios.idCuentaBancaria");
+        }
+
+        // Índice en idEmpresa para consultas multi-tenant
+        var idEmpresaIndex = new CreateIndexModel<MovimientoBancario>(
+            Builders<MovimientoBancario>.IndexKeys.Ascending(m => m.IdEmpresa),
+            new CreateIndexOptions { Name = "idx_movimientoBancario_idEmpresa" });
+
+        try
+        {
+            await movimientosCollection.Indexes.CreateOneAsync(idEmpresaIndex, null, cancellationToken);
+            _logger.LogInformation("Created index on 'movimientosBancarios' for 'idEmpresa' field.");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on movimientosBancarios.idEmpresa");
+        }
+
+        // Índice en fecha descendente para listados cronológicos
+        var fechaIndex = new CreateIndexModel<MovimientoBancario>(
+            Builders<MovimientoBancario>.IndexKeys.Descending(m => m.Fecha),
+            new CreateIndexOptions { Name = "idx_movimientoBancario_fecha_desc" });
+
+        try
+        {
+            await movimientosCollection.Indexes.CreateOneAsync(fechaIndex, null, cancellationToken);
+            _logger.LogInformation("Created index on 'movimientosBancarios' for 'fecha' desc field.");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on movimientosBancarios.fecha");
         }
     }
 
