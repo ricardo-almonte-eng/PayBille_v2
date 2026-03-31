@@ -3,7 +3,7 @@ namespace PayBille.Api.Errors;
 /// <summary>
 /// Catálogo de errores con códigos fijos y únicos por escenario.
 /// Cada código identifica exactamente el catch block de origen — búscalo aquí para rastrearlo.
-/// Esquema: [Controlador][Acción][Seq]  PE=Persona AU=Auth EM=Empresa IM=Imagen VE=Venta TU=Turno RD=ResumenDiario  G=GetAll I=GetById C=Create D=Delete L=Login R=Refresh O=Logout S=Subir U=UpdateImagen A=AgregarSucursal E=ActualizarEstatus
+/// Esquema: [Controlador][Acción][Seq]  PE=Persona AU=Auth EM=Empresa IM=Imagen VE=Venta TU=Turno RD=ResumenDiario RV=ReporteVentas RI=ReporteInventario RP=ReporteProductos RT=ReporteTurnos  G=GetAll I=GetById C=Create D=Delete L=Login R=Refresh O=Logout S=Subir U=UpdateImagen A=AgregarSucursal E=ActualizarEstatus
 /// </summary>
 public static class AppErrors
 {
@@ -244,6 +244,26 @@ public static class AppErrors
     /// <summary>RDG01 — Error interno al listar resúmenes diarios.</summary>
     public static AppError ResumenDiarioListaErrorInterno()
         => AppError.From("RDG01", "Ocurrió un error al obtener los resúmenes diarios.");
+
+    // ── Reporte de Ventas · Generar ──────────────────────────────────────────
+    /// <summary>RVG01 — Uno o más filtros del reporte de ventas no son válidos.</summary>
+    public static AppError ReporteVentasFiltroInvalido(string detalle)
+        => AppError.From("RVG01", $"Los filtros del reporte de ventas no son válidos: {detalle}");
+
+    // ── Reporte de Inventario · Generar ──────────────────────────────────────
+    /// <summary>RIG01 — Uno o más filtros del reporte de inventario no son válidos.</summary>
+    public static AppError ReporteInventarioFiltroInvalido(string detalle)
+        => AppError.From("RIG01", $"Los filtros del reporte de inventario no son válidos: {detalle}");
+
+    // ── Reporte de Productos · Generar ───────────────────────────────────────
+    /// <summary>RPG01 — Uno o más filtros del reporte de productos no son válidos.</summary>
+    public static AppError ReporteProductosFiltroInvalido(string detalle)
+        => AppError.From("RPG01", $"Los filtros del reporte de productos no son válidos: {detalle}");
+
+    // ── Reporte de Turnos · Generar ──────────────────────────────────────────
+    /// <summary>RTG01 — Uno o más filtros del reporte de turnos no son válidos.</summary>
+    public static AppError ReporteTurnosFiltroInvalido(string detalle)
+        => AppError.From("RTG01", $"Los filtros del reporte de turnos no son válidos: {detalle}");
 
     // ── Global · Excepción no controlada (500) ────────────────────────────────
     /// <summary>APC01 — Error crítico no controlado capturado por GlobalExceptionHandler.</summary>

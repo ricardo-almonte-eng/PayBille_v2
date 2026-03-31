@@ -90,6 +90,7 @@ builder.Services.AddScoped<PayBille.Api.Interfaces.IEmpresaService, PayBille.Api
 builder.Services.AddScoped<PayBille.Api.Interfaces.IImagenService, PayBille.Api.Services.ImagenService>();
 builder.Services.AddScoped<PayBille.Api.Interfaces.ICatalogoProductoService, PayBille.Api.Services.CatalogoProductoService>();
 builder.Services.AddScoped<PayBille.Api.Interfaces.IProductoAlmacenService, PayBille.Api.Services.ProductoAlmacenService>();
+builder.Services.AddScoped<PayBille.Api.Interfaces.IReportesService, PayBille.Api.Services.ReportesService>();
 builder.Services.AddScoped<PayBille.Api.Infrastructure.Services.MongoDbInitializerService>();
 
 // ── MVC / Swagger ──────────────────────────────────────────────────────────
