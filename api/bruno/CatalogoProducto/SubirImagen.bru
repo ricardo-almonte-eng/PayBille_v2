@@ -1,0 +1,19 @@
+meta {
+  name: Subir Imagen
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/catalogoproducto/{{catalogoProductoId}}/imagen
+  body: multipart-form
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:multipart-form {
+  archivo: @file()
+}

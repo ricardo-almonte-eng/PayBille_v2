@@ -29,6 +29,8 @@ builder.Services.AddScoped(typeof(IMongoRepository<>), typeof(MongoRepository<>)
 // Register specific repositories
 builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.PersonaRepository>();
 builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.EmpresaRepository>();
+builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.CatalogoProductoRepository>();
+builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.ProductoAlmacenRepository>();
 
 // ── Imagenes ───────────────────────────────────────────────────────────────
 builder.Services.Configure<ImagenSettings>(
@@ -83,6 +85,8 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<PayBille.Api.Interfaces.IPersonaService, PayBille.Api.Services.PersonaService>();
 builder.Services.AddScoped<PayBille.Api.Interfaces.IEmpresaService, PayBille.Api.Services.EmpresaService>();
 builder.Services.AddScoped<PayBille.Api.Interfaces.IImagenService, PayBille.Api.Services.ImagenService>();
+builder.Services.AddScoped<PayBille.Api.Interfaces.ICatalogoProductoService, PayBille.Api.Services.CatalogoProductoService>();
+builder.Services.AddScoped<PayBille.Api.Interfaces.IProductoAlmacenService, PayBille.Api.Services.ProductoAlmacenService>();
 builder.Services.AddScoped<PayBille.Api.Infrastructure.Services.MongoDbInitializerService>();
 
 // ── MVC / Swagger ──────────────────────────────────────────────────────────

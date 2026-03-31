@@ -149,6 +149,16 @@ public static class AppErrors
     public static AppError PersonaImagenNoEncontrada(string id)
         => AppError.From("PEU01", $"No encontramos a la persona con identificador {id} para actualizar su imagen.");
 
+    // ── CatalogoProducto · ActualizarImagen ──────────────────────────────────
+    /// <summary>CPU01 — No se encontró el producto de catálogo al intentar actualizar su imagen.</summary>
+    public static AppError CatalogoProductoImagenNoEncontrado(string id)
+        => AppError.From("CPU01", $"No encontramos el producto de catálogo con identificador {id} para actualizar su imagen.");
+
+    // ── ProductoAlmacen · ActualizarImagen ───────────────────────────────────
+    /// <summary>PAU01 — No se encontró el producto de almacén al intentar actualizar su imagen.</summary>
+    public static AppError ProductoAlmacenImagenNoEncontrado(string id)
+        => AppError.From("PAU01", $"No encontramos el producto de almacén con identificador {id} para actualizar su imagen.");
+
     // ── Global · Excepción no controlada (500) ────────────────────────────────
     /// <summary>APC01 — Error crítico no controlado capturado por GlobalExceptionHandler.</summary>
     public static AppError ErrorCriticoInterno()
