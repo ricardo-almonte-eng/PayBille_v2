@@ -1,0 +1,15 @@
+meta {
+  name: Obtener Por Item
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/movimientoinventario/item/{{itemInventarioId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

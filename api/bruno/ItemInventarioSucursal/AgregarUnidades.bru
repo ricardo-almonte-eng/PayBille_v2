@@ -1,0 +1,36 @@
+meta {
+  name: Agregar Unidades
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/iteminventariosucursal/{{itemInventarioId}}/unidades
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "unidades": [
+      {
+        "codigoSerial": "351234567890123",
+        "esUnico": true,
+        "cantidad": 1,
+        "costo": 750.00,
+        "estadoUso": "Nuevo",
+        "condicion": null,
+        "grado": null,
+        "bateria": null
+      }
+    ]
+  }
+}

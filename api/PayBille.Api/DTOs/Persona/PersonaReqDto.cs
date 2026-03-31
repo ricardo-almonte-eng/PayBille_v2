@@ -15,8 +15,6 @@ public sealed class PersonaReqDto
 
     public int? IdMarket { get; set; }
 
-    public string? Imagen { get; set; }
-
     [Required]
     public UsuarioPersonaReqDto Usuario { get; set; } = new();
 }

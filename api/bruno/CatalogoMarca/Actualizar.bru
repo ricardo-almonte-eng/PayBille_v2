@@ -1,0 +1,27 @@
+meta {
+  name: Actualizar
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/catalogomarca/{{catalogoMarcaId}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "nombre": "Apple Inc.",
+    "imagen": null,
+    "activa": true
+  }
+}

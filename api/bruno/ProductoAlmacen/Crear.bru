@@ -1,0 +1,46 @@
+meta {
+  name: Crear
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/productoalmacen
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "idCatalogo": null,
+    "idEmpresa": "{{empresaId}}",
+    "nombre": "iPhone 15 Pro",
+    "descripcion": "Smartphone de alta gama",
+    "codigoBarra": "0123456789012",
+    "marca": "Apple",
+    "modelo": "15 Pro",
+    "categoria": "Celulares",
+    "color": "Negro Medianoche",
+    "unidadMedida": "unidad",
+    "esTaller": false,
+    "esPieza": false,
+    "esProducido": false,
+    "manejaCodigoUnico": true,
+    "idPlantillaGarantiaPorDefecto": null,
+    "activo": true
+  }
+}
+
+script:post-response {
+  if (res.body.code === "0") {
+    bru.setVar("productoAlmacenId", res.body.data.idProductoAlmacen);
+  }
+}

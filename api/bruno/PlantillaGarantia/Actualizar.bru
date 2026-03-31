@@ -1,0 +1,28 @@
+meta {
+  name: Actualizar
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/plantillagarantia/{{plantillaGarantiaId}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "nombre": "Garantía extendida 90 días",
+    "descripcion": "Cubre defectos de fábrica y daños de hardware por 90 días.",
+    "duracionDiasPorDefecto": 90,
+    "activa": true
+  }
+}

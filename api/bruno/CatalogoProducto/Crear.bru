@@ -1,0 +1,38 @@
+meta {
+  name: Crear
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/catalogoproducto
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "nombre": "iPhone 15 Pro",
+    "codigoBarra": "0123456789012",
+    "marca": "Apple",
+    "modelo": "15 Pro",
+    "categoria": "Celulares",
+    "color": "Negro",
+    "descripcion": "Smartphone de alta gama",
+    "unidadMedida": "unidad"
+  }
+}
+
+script:post-response {
+  if (res.body.code === "0") {
+    bru.setVar("catalogoProductoId", res.body.data.idCatalogoProducto);
+  }
+}

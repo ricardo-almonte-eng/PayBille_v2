@@ -1,0 +1,48 @@
+meta {
+  name: Actualizar
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/iteminventariosucursal/{{itemInventarioId}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "cantidadMinimaAlerta": 2,
+    "cantidadInfinita": false,
+    "precios": {
+      "precio1": 1099.00,
+      "precio2": null,
+      "precio3": null,
+      "precio4": null,
+      "impuesto1": null,
+      "utilidad1": null,
+      "rangoMin": 1,
+      "rangoMax": 1,
+      "rangoImpuesto": 0,
+      "precioEspecial": 950.00,
+      "inicioEspecial": "2026-04-01T00:00:00Z",
+      "finEspecial": "2026-04-30T23:59:59Z",
+      "precioManager": null,
+      "alPorMenorActivo": false,
+      "alPorMenorCantidadMinima": null,
+      "alPorMenorCantidadMaxima": null
+    },
+    "idPlantillaGarantia": "{{plantillaGarantiaId}}",
+    "idProveedor": null,
+    "permitirVenta": true,
+    "ignorarEnReporte": false
+  }
+}

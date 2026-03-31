@@ -1,0 +1,33 @@
+meta {
+  name: Crear
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/catalogocolor
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "nombre": "Negro Medianoche",
+    "hex": "#1C1C1E",
+    "activo": true
+  }
+}
+
+script:post-response {
+  if (res.body.code === "0") {
+    bru.setVar("catalogoColorId", res.body.data.id);
+  }
+}

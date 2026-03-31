@@ -26,6 +26,7 @@ public sealed class MongoDbInitializerService
         {
             await InitializePersonasCollectionAsync(cancellationToken);
             await InitializeEmpresasCollectionAsync(cancellationToken);
+            await SeedUsuarioAdminAsync(cancellationToken);
             _logger.LogInformation("MongoDB initialization completed successfully.");
         }
         catch (Exception ex)
@@ -148,5 +149,54 @@ public sealed class MongoDbInitializerService
         {
             _logger.LogInformation("Index already exists on empresas.creadoEnUtc");
         }
+    }
+
+    /// <summary>
+    /// Crea el usuario administrador por defecto si no existe ningún usuario en la colección.
+    /// Solo se ejecuta una vez (primer arranque).
+    /// </summary>
+    private async Task SeedUsuarioAdminAsync(CancellationToken cancellationToken = default)
+    {
+        var personasCollection = _context.Database.GetCollection<Persona>("personas");
+
+        var hayPersonas = await personasCollection
+            .Find(Builders<Persona>.Filter.Empty)
+            .Limit(1)
+            .AnyAsync(cancellationToken);
+
+        if (hayPersonas)
+        {
+            _logger.LogInformation("Colección 'personas' ya contiene datos. Se omite el seed del admin.");
+            return;
+        }
+
+        const string contrasenaDefault = "Admin@123";
+        var idPersona = Guid.NewGuid().ToString();
+
+        var admin = new Persona
+        {
+            IdPersona    = idPersona,
+            PrimerNombre = "Administrador",
+            CreadoEnUtc  = DateTime.UtcNow,
+            Usuario = new UsuarioPersona
+            {
+                NombreUsuario  = "admin",
+                ContrasenaHash = BCrypt.Net.BCrypt.HashPassword(contrasenaDefault),
+                IdRol          = 1,
+                Activo         = true,
+                Master         = true
+            }
+        };
+
+        await personasCollection.InsertOneAsync(admin, cancellationToken: cancellationToken);
+
+        _logger.LogWarning(
+            "════════════════════════════════════════════════════════════════\n" +
+            "  USUARIO ADMINISTRADOR INICIAL CREADO\n" +
+            "  Usuario:    admin\n" +
+            "  Contraseña: {Contrasena}\n" +
+            "  ⚠ Cambia esta contraseña después del primer login.\n" +
+            "════════════════════════════════════════════════════════════════",
+            contrasenaDefault);
     }
 }

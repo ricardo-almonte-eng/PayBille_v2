@@ -10,26 +10,25 @@ put {
   auth: bearer
 }
 
-auth:bearer {
-  token: {{accessToken}}
-}
-
 headers {
   Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
 }
 
 body:json {
   {
     "primerNombre": "Ricardo",
-    "apellido": "González Pérez",
-    "identificacion": "001-0000001-1",
+    "apellido": "J. Almonte",
+    "identificacion": "402-08921599",
     "tipoIdentificacion": "cedula",
     "idMarket": 1,
-    "imagen": null,
     "usuario": {
-      "nombreUsuario": "rgonzalez",
-      "contrasena": null,
-      "email": "rgonzalez@paybille.com",
+      "nombreUsuario": "ralmonte",
+      "contrasena": "LandRover36@",
+      "email": "ricarditoalmonte98@gmail.com",
       "idRol": 1,
       "activo": true,
       "torning": null,

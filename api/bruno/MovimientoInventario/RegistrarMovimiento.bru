@@ -1,0 +1,42 @@
+meta {
+  name: Registrar Movimiento
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/movimientoinventario
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "idEmpresa": "{{empresaId}}",
+    "idSucursal": "{{sucursalId}}",
+    "idItem": "{{itemInventarioId}}",
+    "codigoSerialAfectado": null,
+    "tipo": "Entrada",
+    "cantidadAntes": 0,
+    "cantidadDespues": 10,
+    "diferencia": 10,
+    "idVenta": null,
+    "idCompra": null,
+    "idPersona": null,
+    "comentario": "Entrada inicial de inventario"
+  }
+}
+
+script:post-response {
+  if (res.body.code === "0") {
+    bru.setVar("movimientoInventarioId", res.body.data.id);
+  }
+}

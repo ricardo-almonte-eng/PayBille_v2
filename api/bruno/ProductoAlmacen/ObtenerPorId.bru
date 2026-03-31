@@ -1,0 +1,15 @@
+meta {
+  name: Obtener Por Id
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/productoalmacen/{{productoAlmacenId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

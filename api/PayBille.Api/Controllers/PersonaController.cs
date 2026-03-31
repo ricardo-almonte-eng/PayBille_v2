@@ -60,9 +60,12 @@ public sealed class PersonaController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(ApiRespDto<PersonaResDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Crear(
-        [FromBody] PersonaReqDto request,
+        [FromBody] PersonaReqDto? request,
         CancellationToken cancellationToken)
     {
+        if (request is null)
+            return Ok(ApiRespDto<PersonaResDto>.Error(AppErrors.PersonaValidacionFallida("El cuerpo de la solicitud es requerido.")));
+
         var validation = await _validator.ValidateAsync(request, cancellationToken);
         if (!validation.IsValid)
         {
@@ -83,9 +86,12 @@ public sealed class PersonaController : ControllerBase
     [ProducesResponseType(typeof(ApiRespDto<PersonaResDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Actualizar(
         string id,
-        [FromBody] PersonaReqDto request,
+        [FromBody] PersonaReqDto? request,
         CancellationToken cancellationToken)
     {
+        if (request is null)
+            return Ok(ApiRespDto<PersonaResDto>.Error(AppErrors.PersonaValidacionFallida("El cuerpo de la solicitud es requerido.")));
+
         var validation = await _validator.ValidateAsync(request, cancellationToken);
         if (!validation.IsValid)
         {

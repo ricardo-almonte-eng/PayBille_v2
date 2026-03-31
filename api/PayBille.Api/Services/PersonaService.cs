@@ -71,7 +71,7 @@ public sealed class PersonaService : IPersonaService
             Identificacion     = request.Identificacion,
             TipoIdentificacion = request.TipoIdentificacion,
             IdMarket           = request.IdMarket,
-            Imagen             = request.Imagen,
+            Imagen             = existente?.Imagen,
             CreadoEnUtc        = existente?.CreadoEnUtc ?? DateTime.UtcNow,
             Usuario     = new UsuarioPersona
             {

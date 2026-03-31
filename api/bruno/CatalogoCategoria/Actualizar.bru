@@ -1,0 +1,28 @@
+meta {
+  name: Actualizar
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/catalogocategoria/{{catalogoCategoriaId}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "nombre": "Smartphones",
+    "idCategoriaPadre": null,
+    "icono": "smartphone",
+    "activa": true
+  }
+}

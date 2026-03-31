@@ -1,0 +1,35 @@
+meta {
+  name: Crear
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/plantillagarantia
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "idEmpresa": "{{empresaId}}",
+    "nombre": "Garantía estándar 30 días",
+    "descripcion": "Cubre defectos de fábrica por 30 días a partir de la fecha de compra.",
+    "duracionDiasPorDefecto": 30,
+    "activa": true
+  }
+}
+
+script:post-response {
+  if (res.body.code === "0") {
+    bru.setVar("plantillaGarantiaId", res.body.data.id);
+  }
+}

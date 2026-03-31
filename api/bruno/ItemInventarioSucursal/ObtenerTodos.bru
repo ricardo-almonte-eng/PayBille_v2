@@ -1,0 +1,15 @@
+meta {
+  name: Obtener Todos
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/iteminventariosucursal
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

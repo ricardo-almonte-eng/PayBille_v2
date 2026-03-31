@@ -1,0 +1,40 @@
+meta {
+  name: Actualizar
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/productoalmacen/{{productoAlmacenId}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "idCatalogo": null,
+    "idEmpresa": "{{empresaId}}",
+    "nombre": "iPhone 15 Pro Max",
+    "descripcion": "Smartphone de alta gama actualizado",
+    "codigoBarra": "0123456789012",
+    "marca": "Apple",
+    "modelo": "15 Pro Max",
+    "categoria": "Celulares",
+    "color": "Titanio Natural",
+    "unidadMedida": "unidad",
+    "esTaller": false,
+    "esPieza": false,
+    "esProducido": false,
+    "manejaCodigoUnico": true,
+    "idPlantillaGarantiaPorDefecto": null,
+    "activo": true
+  }
+}

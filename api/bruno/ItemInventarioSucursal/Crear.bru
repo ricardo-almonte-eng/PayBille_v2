@@ -1,0 +1,57 @@
+meta {
+  name: Crear
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/iteminventariosucursal
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "idEmpresa": "{{empresaId}}",
+    "idSucursal": "{{sucursalId}}",
+    "idProductoAlmacen": "{{productoAlmacenId}}",
+    "cantidadMinimaAlerta": 1,
+    "cantidadInfinita": false,
+    "precios": {
+      "precio1": 999.00,
+      "precio2": null,
+      "precio3": null,
+      "precio4": null,
+      "impuesto1": null,
+      "utilidad1": null,
+      "rangoMin": 1,
+      "rangoMax": 1,
+      "rangoImpuesto": 0,
+      "precioEspecial": null,
+      "inicioEspecial": null,
+      "finEspecial": null,
+      "precioManager": null,
+      "alPorMenorActivo": false,
+      "alPorMenorCantidadMinima": null,
+      "alPorMenorCantidadMaxima": null
+    },
+    "idPlantillaGarantia": null,
+    "idProveedor": null,
+    "permitirVenta": true,
+    "ignorarEnReporte": false
+  }
+}
+
+script:post-response {
+  if (res.body.code === "0") {
+    bru.setVar("itemInventarioId", res.body.data.id);
+  }
+}

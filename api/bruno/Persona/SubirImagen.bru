@@ -6,7 +6,7 @@ meta {
 
 post {
   url: {{baseUrl}}/api/persona/{{personaId}}/imagen
-  body: multipart-form
+  body: multipartForm
   auth: bearer
 }
 
@@ -15,5 +15,5 @@ auth:bearer {
 }
 
 body:multipart-form {
-  archivo: @file()
+  archivo: @file(C:\Users\Ricardo\Desktop\unnamed.png)
 }

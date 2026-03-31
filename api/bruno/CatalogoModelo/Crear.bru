@@ -1,0 +1,33 @@
+meta {
+  name: Crear
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/catalogomodelo
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "nombre": "iPhone 15 Pro",
+    "idMarca": "{{catalogoMarcaId}}",
+    "activo": true
+  }
+}
+
+script:post-response {
+  if (res.body.code === "0") {
+    bru.setVar("catalogoModeloId", res.body.data.id);
+  }
+}
