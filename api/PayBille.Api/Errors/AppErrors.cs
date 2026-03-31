@@ -3,7 +3,7 @@ namespace PayBille.Api.Errors;
 /// <summary>
 /// Catálogo de errores con códigos fijos y únicos por escenario.
 /// Cada código identifica exactamente el catch block de origen — búscalo aquí para rastrearlo.
-/// Esquema: [Controlador][Acción][Seq]  PE=Persona AU=Auth EM=Empresa IM=Imagen  G=GetAll I=GetById C=Create D=Delete L=Login R=Refresh O=Logout S=Subir U=UpdateImagen A=AgregarSucursal E=ActualizarEstatus
+/// Esquema: [Controlador][Acción][Seq]  PE=Persona AU=Auth EM=Empresa IM=Imagen VE=Venta TU=Turno RD=ResumenDiario  G=GetAll I=GetById C=Create D=Delete L=Login R=Refresh O=Logout S=Subir U=UpdateImagen A=AgregarSucursal E=ActualizarEstatus
 /// </summary>
 public static class AppErrors
 {
@@ -158,6 +158,92 @@ public static class AppErrors
     /// <summary>PAU01 — No se encontró el producto de almacén al intentar actualizar su imagen.</summary>
     public static AppError ProductoAlmacenImagenNoEncontrado(string id)
         => AppError.From("PAU01", $"No encontramos el producto de almacén con identificador {id} para actualizar su imagen.");
+
+    // ── Venta · ObtenerTodos ─────────────────────────────────────────────────
+    /// <summary>VEG01 — Error interno al listar ventas.</summary>
+    public static AppError VentaListaErrorInterno()
+        => AppError.From("VEG01", "Ocurrió un error al obtener la lista de ventas.");
+
+    // ── Venta · ObtenerPorId ─────────────────────────────────────────────────
+    /// <summary>VEI01 — No se encontró la venta con el identificador especificado.</summary>
+    public static AppError VentaNoEncontrada(string id)
+        => AppError.From("VEI01", $"No encontramos la venta con identificador {id}.");
+
+    /// <summary>VEI02 — Error interno al buscar una venta por id.</summary>
+    public static AppError VentaBuscarErrorInterno()
+        => AppError.From("VEI02", "Ocurrió un error al buscar la venta.");
+
+    // ── Venta · Crear ────────────────────────────────────────────────────────
+    /// <summary>VEC01 — Uno o más campos no pasaron la validación.</summary>
+    public static AppError VentaValidacionFallida(string detalle)
+        => AppError.From("VEC01", $"Los datos de la venta no son válidos: {detalle}");
+
+    /// <summary>VEC02 — Error interno al guardar la venta.</summary>
+    public static AppError VentaCrearErrorInterno()
+        => AppError.From("VEC02", "Ocurrió un error al guardar la venta.");
+
+    // ── Venta · Actualizar ───────────────────────────────────────────────────
+    /// <summary>VEU01 — No se encontró la venta al intentar actualizarla.</summary>
+    public static AppError VentaActualizarNoEncontrada(string id)
+        => AppError.From("VEU01", $"No encontramos la venta con identificador {id} para actualizar.");
+
+    // ── Venta · Anular ───────────────────────────────────────────────────────
+    /// <summary>VEA01 — No se encontró la venta al intentar anularla.</summary>
+    public static AppError VentaAnularNoEncontrada(string id)
+        => AppError.From("VEA01", $"No encontramos la venta con identificador {id} para anular.");
+
+    /// <summary>VEA02 — La venta ya fue anulada previamente.</summary>
+    public static AppError VentaYaAnulada(string id)
+        => AppError.From("VEA02", $"La venta {id} ya se encuentra anulada.");
+
+    // ── Turno · ObtenerTodos ─────────────────────────────────────────────────
+    /// <summary>TUG01 — Error interno al listar turnos.</summary>
+    public static AppError TurnoListaErrorInterno()
+        => AppError.From("TUG01", "Ocurrió un error al obtener la lista de turnos.");
+
+    // ── Turno · ObtenerPorId ─────────────────────────────────────────────────
+    /// <summary>TUI01 — No se encontró el turno con el identificador especificado.</summary>
+    public static AppError TurnoNoEncontrado(string id)
+        => AppError.From("TUI01", $"No encontramos el turno con identificador {id}.");
+
+    /// <summary>TUI02 — Error interno al buscar un turno por id.</summary>
+    public static AppError TurnoBuscarErrorInterno()
+        => AppError.From("TUI02", "Ocurrió un error al buscar el turno.");
+
+    // ── Turno · Abrir ────────────────────────────────────────────────────────
+    /// <summary>TUC01 — Uno o más campos no pasaron la validación.</summary>
+    public static AppError TurnoValidacionFallida(string detalle)
+        => AppError.From("TUC01", $"Los datos del turno no son válidos: {detalle}");
+
+    /// <summary>TUC02 — El usuario ya tiene un turno abierto en esta sucursal.</summary>
+    public static AppError TurnoYaAbierto(string idPersona)
+        => AppError.From("TUC02", $"El usuario {idPersona} ya tiene un turno abierto en esta sucursal.");
+
+    /// <summary>TUC03 — Error interno al guardar el turno.</summary>
+    public static AppError TurnoCrearErrorInterno()
+        => AppError.From("TUC03", "Ocurrió un error al guardar el turno.");
+
+    // ── Turno · Cerrar ───────────────────────────────────────────────────────
+    /// <summary>TUE01 — No se encontró el turno al intentar cerrarlo.</summary>
+    public static AppError TurnoCerrarNoEncontrado(string id)
+        => AppError.From("TUE01", $"No encontramos el turno con identificador {id} para cerrar.");
+
+    /// <summary>TUE02 — El turno ya fue cerrado previamente.</summary>
+    public static AppError TurnoYaCerrado(string id)
+        => AppError.From("TUE02", $"El turno {id} ya se encuentra cerrado.");
+
+    // ── ResumenDiario · ObtenerPorFecha ──────────────────────────────────────
+    /// <summary>RDI01 — No se encontró el resumen diario para la fecha indicada.</summary>
+    public static AppError ResumenDiarioNoEncontrado(string idSucursal, string fecha)
+        => AppError.From("RDI01", $"No encontramos el resumen del día {fecha} para la sucursal {idSucursal}.");
+
+    /// <summary>RDI02 — Error interno al buscar el resumen diario.</summary>
+    public static AppError ResumenDiarioBuscarErrorInterno()
+        => AppError.From("RDI02", "Ocurrió un error al buscar el resumen diario.");
+
+    /// <summary>RDG01 — Error interno al listar resúmenes diarios.</summary>
+    public static AppError ResumenDiarioListaErrorInterno()
+        => AppError.From("RDG01", "Ocurrió un error al obtener los resúmenes diarios.");
 
     // ── Global · Excepción no controlada (500) ────────────────────────────────
     /// <summary>APC01 — Error crítico no controlado capturado por GlobalExceptionHandler.</summary>

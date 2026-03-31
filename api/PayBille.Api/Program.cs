@@ -31,6 +31,9 @@ builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.PersonaRepos
 builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.EmpresaRepository>();
 builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.CatalogoProductoRepository>();
 builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.ProductoAlmacenRepository>();
+builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.VentaRepository>();
+builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.TurnoRepository>();
+builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.ResumenDiarioRepository>();
 
 // ── Imagenes ───────────────────────────────────────────────────────────────
 builder.Services.Configure<ImagenSettings>(
