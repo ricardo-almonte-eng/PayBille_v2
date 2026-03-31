@@ -26,6 +26,9 @@ public sealed class MongoDbInitializerService
         {
             await InitializePersonasCollectionAsync(cancellationToken);
             await InitializeEmpresasCollectionAsync(cancellationToken);
+            await InitializeVentasCollectionAsync(cancellationToken);
+            await InitializeTurnosCollectionAsync(cancellationToken);
+            await InitializeResumenesDiariosCollectionAsync(cancellationToken);
             await SeedUsuarioAdminAsync(cancellationToken);
             _logger.LogInformation("MongoDB initialization completed successfully.");
         }
@@ -148,6 +151,164 @@ public sealed class MongoDbInitializerService
         catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
         {
             _logger.LogInformation("Index already exists on empresas.creadoEnUtc");
+        }
+    }
+
+    private async Task InitializeVentasCollectionAsync(CancellationToken cancellationToken = default)
+    {
+        var ventasCollection = _context.Database.GetCollection<Venta>("ventas");
+
+        // Índice compuesto por sucursal + fecha para reportes diarios
+        var sucursalFechaIndex = new CreateIndexModel<Venta>(
+            Builders<Venta>.IndexKeys.Combine(
+                Builders<Venta>.IndexKeys.Ascending(v => v.IdSucursal),
+                Builders<Venta>.IndexKeys.Descending(v => v.Fecha)),
+            new CreateIndexOptions { Name = "idx_venta_sucursal_fecha" });
+
+        try
+        {
+            await ventasCollection.Indexes.CreateOneAsync(sucursalFechaIndex, null, cancellationToken);
+            _logger.LogInformation("Created compound index on 'ventas' (idSucursal, fecha).");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on ventas.idSucursal+fecha");
+        }
+
+        // Índice por turno para reportes de turno
+        var turnoIndex = new CreateIndexModel<Venta>(
+            Builders<Venta>.IndexKeys.Ascending(v => v.IdTurno),
+            new CreateIndexOptions { Name = "idx_venta_turno", Sparse = true });
+
+        try
+        {
+            await ventasCollection.Indexes.CreateOneAsync(turnoIndex, null, cancellationToken);
+            _logger.LogInformation("Created index on 'ventas' (idTurno).");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on ventas.idTurno");
+        }
+
+        // Índice por estatus para filtrar ventas completadas/anuladas
+        var estatusIndex = new CreateIndexModel<Venta>(
+            Builders<Venta>.IndexKeys.Ascending(v => v.Estatus),
+            new CreateIndexOptions { Name = "idx_venta_estatus" });
+
+        try
+        {
+            await ventasCollection.Indexes.CreateOneAsync(estatusIndex, null, cancellationToken);
+            _logger.LogInformation("Created index on 'ventas' (estatus).");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on ventas.estatus");
+        }
+
+        // Índice por empresa para multi-tenant
+        var empresaIndex = new CreateIndexModel<Venta>(
+            Builders<Venta>.IndexKeys.Ascending(v => v.IdEmpresa),
+            new CreateIndexOptions { Name = "idx_venta_empresa" });
+
+        try
+        {
+            await ventasCollection.Indexes.CreateOneAsync(empresaIndex, null, cancellationToken);
+            _logger.LogInformation("Created index on 'ventas' (idEmpresa).");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on ventas.idEmpresa");
+        }
+    }
+
+    private async Task InitializeTurnosCollectionAsync(CancellationToken cancellationToken = default)
+    {
+        var turnosCollection = _context.Database.GetCollection<Turno>("turnos");
+
+        // Índice compuesto para buscar turno activo de un usuario en una sucursal
+        var personaSucursalIndex = new CreateIndexModel<Turno>(
+            Builders<Turno>.IndexKeys.Combine(
+                Builders<Turno>.IndexKeys.Ascending(t => t.IdPersona),
+                Builders<Turno>.IndexKeys.Ascending(t => t.IdSucursal),
+                Builders<Turno>.IndexKeys.Ascending(t => t.EstaCerrado)),
+            new CreateIndexOptions { Name = "idx_turno_persona_sucursal_abierto" });
+
+        try
+        {
+            await turnosCollection.Indexes.CreateOneAsync(personaSucursalIndex, null, cancellationToken);
+            _logger.LogInformation("Created compound index on 'turnos' (idPersona, idSucursal, estaCerrado).");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on turnos.idPersona+idSucursal+estaCerrado");
+        }
+
+        // Índice por fecha de inicio para reportes de turno por período
+        var inicioIndex = new CreateIndexModel<Turno>(
+            Builders<Turno>.IndexKeys.Descending(t => t.Inicio),
+            new CreateIndexOptions { Name = "idx_turno_inicio" });
+
+        try
+        {
+            await turnosCollection.Indexes.CreateOneAsync(inicioIndex, null, cancellationToken);
+            _logger.LogInformation("Created index on 'turnos' (inicio).");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on turnos.inicio");
+        }
+
+        // Índice por empresa para multi-tenant
+        var empresaIndex = new CreateIndexModel<Turno>(
+            Builders<Turno>.IndexKeys.Ascending(t => t.IdEmpresa),
+            new CreateIndexOptions { Name = "idx_turno_empresa" });
+
+        try
+        {
+            await turnosCollection.Indexes.CreateOneAsync(empresaIndex, null, cancellationToken);
+            _logger.LogInformation("Created index on 'turnos' (idEmpresa).");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on turnos.idEmpresa");
+        }
+    }
+
+    private async Task InitializeResumenesDiariosCollectionAsync(CancellationToken cancellationToken = default)
+    {
+        var resumenesCollection = _context.Database.GetCollection<ResumenDiario>("resumenesDiarios");
+
+        // Índice único compuesto (idEmpresa + idSucursal + fecha) — un documento por día por sucursal
+        var claveUnicaIndex = new CreateIndexModel<ResumenDiario>(
+            Builders<ResumenDiario>.IndexKeys.Combine(
+                Builders<ResumenDiario>.IndexKeys.Ascending(r => r.IdEmpresa),
+                Builders<ResumenDiario>.IndexKeys.Ascending(r => r.IdSucursal),
+                Builders<ResumenDiario>.IndexKeys.Ascending(r => r.Fecha)),
+            new CreateIndexOptions { Unique = true, Name = "idx_resumen_empresa_sucursal_fecha_unique" });
+
+        try
+        {
+            await resumenesCollection.Indexes.CreateOneAsync(claveUnicaIndex, null, cancellationToken);
+            _logger.LogInformation("Created unique compound index on 'resumenesDiarios' (idEmpresa, idSucursal, fecha).");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on resumenesDiarios.idEmpresa+idSucursal+fecha");
+        }
+
+        // Índice por fecha descendente para consultas de los últimos N días
+        var fechaIndex = new CreateIndexModel<ResumenDiario>(
+            Builders<ResumenDiario>.IndexKeys.Descending(r => r.Fecha),
+            new CreateIndexOptions { Name = "idx_resumen_fecha_desc" });
+
+        try
+        {
+            await resumenesCollection.Indexes.CreateOneAsync(fechaIndex, null, cancellationToken);
+            _logger.LogInformation("Created index on 'resumenesDiarios' (fecha desc).");
+        }
+        catch (MongoCommandException ex) when (ex.Message.Contains("already exists"))
+        {
+            _logger.LogInformation("Index already exists on resumenesDiarios.fecha");
         }
     }
 
