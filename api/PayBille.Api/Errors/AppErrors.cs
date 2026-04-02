@@ -245,6 +245,86 @@ public static class AppErrors
     public static AppError ResumenDiarioListaErrorInterno()
         => AppError.From("RDG01", "Ocurrió un error al obtener los resúmenes diarios.");
 
+    // ── Banco · ObtenerTodos ─────────────────────────────────────────────────
+    /// <summary>BAG01 — Error interno al listar bancos.</summary>
+    public static AppError BancoListaErrorInterno()
+        => AppError.From("BAG01", "Ocurrió un error al obtener la lista de bancos.");
+
+    // ── Banco · ObtenerPorId ─────────────────────────────────────────────────
+    /// <summary>BAI01 — No se encontró el banco con el identificador especificado.</summary>
+    public static AppError BancoNoEncontrado(string id)
+        => AppError.From("BAI01", $"No encontramos el banco con identificador {id}.");
+
+    // ── Banco · CrearOActualizar ──────────────────────────────────────────────
+    /// <summary>BAC01 — Uno o más campos no pasaron la validación al crear/actualizar banco.</summary>
+    public static AppError BancoValidacionFallida(string detalle)
+        => AppError.From("BAC01", $"Los datos del banco no son válidos: {detalle}");
+
+    /// <summary>BAC02 — Ya existe un banco con ese nombre (case insensitive).</summary>
+    public static AppError BancoNombreDuplicado(string nombre)
+        => AppError.From("BAC02", $"Ya existe un banco registrado con el nombre '{nombre}'.");
+
+    // ── Banco · Eliminar ──────────────────────────────────────────────────────
+    /// <summary>BAD01 — No se encontró el banco a eliminar.</summary>
+    public static AppError BancoEliminarNoEncontrado(string id)
+        => AppError.From("BAD01", $"No encontramos el banco con identificador {id} para eliminar.");
+
+    /// <summary>BAD02 — El banco tiene cuentas bancarias asociadas y no puede eliminarse.</summary>
+    public static AppError BancoConCuentasAsociadas(string id)
+        => AppError.From("BAD02", $"El banco {id} tiene cuentas bancarias asociadas. Elimínalas primero.");
+
+    // ── CuentaBancaria · ObtenerTodos ────────────────────────────────────────
+    /// <summary>CBG01 — Error interno al listar cuentas bancarias.</summary>
+    public static AppError CuentaBancariaListaErrorInterno()
+        => AppError.From("CBG01", "Ocurrió un error al obtener la lista de cuentas bancarias.");
+
+    // ── CuentaBancaria · ObtenerPorId ────────────────────────────────────────
+    /// <summary>CBI01 — No se encontró la cuenta bancaria con el identificador especificado.</summary>
+    public static AppError CuentaBancariaNoEncontrada(string id)
+        => AppError.From("CBI01", $"No encontramos la cuenta bancaria con identificador {id}.");
+
+    // ── CuentaBancaria · CrearOActualizar ─────────────────────────────────────
+    /// <summary>CBC01 — Uno o más campos no pasaron la validación al crear/actualizar cuenta bancaria.</summary>
+    public static AppError CuentaBancariaValidacionFallida(string detalle)
+        => AppError.From("CBC01", $"Los datos de la cuenta bancaria no son válidos: {detalle}");
+
+    /// <summary>CBC02 — El banco referenciado por IdBanco no existe en el catálogo.</summary>
+    public static AppError CuentaBancariaBancoNoEncontrado(string idBanco)
+        => AppError.From("CBC02", $"No encontramos el banco con identificador {idBanco} al crear la cuenta.");
+
+    // ── CuentaBancaria · Eliminar ─────────────────────────────────────────────
+    /// <summary>CBD01 — No se encontró la cuenta bancaria a eliminar.</summary>
+    public static AppError CuentaBancariaEliminarNoEncontrada(string id)
+        => AppError.From("CBD01", $"No encontramos la cuenta bancaria con identificador {id} para eliminar.");
+
+    /// <summary>CBD02 — La cuenta bancaria tiene movimientos asociados y no puede eliminarse.</summary>
+    public static AppError CuentaBancariaConMovimientosAsociados(string id)
+        => AppError.From("CBD02", $"La cuenta bancaria {id} tiene movimientos registrados. Elimínalos primero.");
+
+    // ── MovimientoBancario · ObtenerTodos ────────────────────────────────────
+    /// <summary>MBG01 — Error interno al listar movimientos bancarios.</summary>
+    public static AppError MovimientoBancarioListaErrorInterno()
+        => AppError.From("MBG01", "Ocurrió un error al obtener la lista de movimientos bancarios.");
+
+    // ── MovimientoBancario · ObtenerPorId ────────────────────────────────────
+    /// <summary>MBI01 — No se encontró el movimiento bancario con el identificador especificado.</summary>
+    public static AppError MovimientoBancarioNoEncontrado(string id)
+        => AppError.From("MBI01", $"No encontramos el movimiento bancario con identificador {id}.");
+
+    // ── MovimientoBancario · Crear ────────────────────────────────────────────
+    /// <summary>MBC01 — Uno o más campos no pasaron la validación al crear el movimiento.</summary>
+    public static AppError MovimientoBancarioValidacionFallida(string detalle)
+        => AppError.From("MBC01", $"Los datos del movimiento bancario no son válidos: {detalle}");
+
+    /// <summary>MBC02 — La cuenta bancaria referenciada por IdCuentaBancaria no existe.</summary>
+    public static AppError MovimientoBancarioCuentaNoEncontrada(string idCuentaBancaria)
+        => AppError.From("MBC02", $"No encontramos la cuenta bancaria con identificador {idCuentaBancaria} al registrar el movimiento.");
+
+    // ── MovimientoBancario · Eliminar ─────────────────────────────────────────
+    /// <summary>MBD01 — No se encontró el movimiento bancario a eliminar.</summary>
+    public static AppError MovimientoBancarioEliminarNoEncontrado(string id)
+        => AppError.From("MBD01", $"No encontramos el movimiento bancario con identificador {id} para eliminar.");
+
     // ── Global · Excepción no controlada (500) ────────────────────────────────
     /// <summary>APC01 — Error crítico no controlado capturado por GlobalExceptionHandler.</summary>
     public static AppError ErrorCriticoInterno()

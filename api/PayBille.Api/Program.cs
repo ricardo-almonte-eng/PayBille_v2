@@ -34,6 +34,9 @@ builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.ProductoAlma
 builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.VentaRepository>();
 builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.TurnoRepository>();
 builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.ResumenDiarioRepository>();
+builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.BancoRepository>();
+builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.CuentaBancariaRepository>();
+builder.Services.AddScoped<PayBille.Api.Infrastructure.Repositories.MovimientoBancarioRepository>();
 
 // ── Imagenes ───────────────────────────────────────────────────────────────
 builder.Services.Configure<ImagenSettings>(
@@ -91,6 +94,9 @@ builder.Services.AddScoped<PayBille.Api.Interfaces.IImagenService, PayBille.Api.
 builder.Services.AddScoped<PayBille.Api.Interfaces.ICatalogoProductoService, PayBille.Api.Services.CatalogoProductoService>();
 builder.Services.AddScoped<PayBille.Api.Interfaces.IProductoAlmacenService, PayBille.Api.Services.ProductoAlmacenService>();
 builder.Services.AddScoped<PayBille.Api.Infrastructure.Services.MongoDbInitializerService>();
+builder.Services.AddScoped<PayBille.Api.Interfaces.IBancoService, PayBille.Api.Services.BancoService>();
+builder.Services.AddScoped<PayBille.Api.Interfaces.ICuentaBancariaService, PayBille.Api.Services.CuentaBancariaService>();
+builder.Services.AddScoped<PayBille.Api.Interfaces.IMovimientoBancarioService, PayBille.Api.Services.MovimientoBancarioService>();
 
 // ── MVC / Swagger ──────────────────────────────────────────────────────────
 builder.Services.AddControllers();
