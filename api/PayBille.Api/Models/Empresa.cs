@@ -59,6 +59,9 @@ public sealed class Empresa
     [BsonElement("valorImpuesto")]
     public decimal ValorImpuesto { get; set; } = 0;
 
+    [BsonElement("zonaHoraria")]
+    public string? ZonaHoraria { get; set; }
+
     [BsonElement("sucursales")]
     public List<Sucursal> Sucursales { get; set; } = [];
 

@@ -19,6 +19,7 @@ public sealed class EmpresaResDto
     public string? Imagen { get; set; }
     public string? RNC { get; set; }
     public decimal ValorImpuesto { get; set; }
+    public string? ZonaHoraria { get; set; }
     public List<SucursalResDto> Sucursales { get; set; } = [];
     public DateTime CreadoEnUtc { get; set; }
 }

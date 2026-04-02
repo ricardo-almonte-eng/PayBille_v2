@@ -38,5 +38,12 @@ public sealed class EmpresaReqDtoValidator : AbstractValidator<EmpresaReqDto>
             .WithMessage("El valor de impuesto no puede ser negativo.")
             .LessThanOrEqualTo(100)
             .WithMessage("El valor de impuesto no puede superar 100.");
+
+        When(x => !string.IsNullOrEmpty(x.ZonaHoraria), () =>
+        {
+            RuleFor(x => x.ZonaHoraria)
+                .Must(tz => TimeZoneInfo.TryFindSystemTimeZoneById(tz!, out _))
+                .WithMessage("La zona horaria proporcionada no es válida. Usa un identificador IANA (ej. 'America/Santo_Domingo').");
+        });
     }
 }
