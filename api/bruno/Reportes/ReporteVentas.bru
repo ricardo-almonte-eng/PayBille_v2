@@ -1,0 +1,15 @@
+meta {
+  name: Reporte de Ventas
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/reportes/ventas?idEmpresa=EMP001&fechaInicio=2025-01-01T00:00:00Z&fechaFin=2025-12-31T23:59:59Z
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
