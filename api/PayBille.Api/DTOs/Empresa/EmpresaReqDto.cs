@@ -29,4 +29,6 @@ public sealed class EmpresaReqDto
     public string? RNC { get; set; }
 
     public decimal ValorImpuesto { get; set; } = 0;
+
+    public string? ZonaHoraria { get; set; }
 }

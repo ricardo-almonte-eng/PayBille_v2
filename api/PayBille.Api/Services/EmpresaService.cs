@@ -64,6 +64,7 @@ public sealed class EmpresaService : IEmpresaService
             Imagen         = request.Imagen,
             RNC            = request.RNC,
             ValorImpuesto  = request.ValorImpuesto,
+            ZonaHoraria    = request.ZonaHoraria,
             Sucursales     = existente?.Sucursales ?? [],
             CreadoEnUtc    = existente?.CreadoEnUtc ?? DateTime.UtcNow,
         };
@@ -204,6 +205,7 @@ public sealed class EmpresaService : IEmpresaService
         Imagen         = e.Imagen,
         RNC            = e.RNC,
         ValorImpuesto  = e.ValorImpuesto,
+        ZonaHoraria    = e.ZonaHoraria,
         Sucursales     = e.Sucursales.ConvertAll(MapSucursalToDto),
         CreadoEnUtc    = e.CreadoEnUtc,
     };
