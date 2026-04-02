@@ -98,6 +98,7 @@ builder.Services.AddScoped<PayBille.Api.Infrastructure.Services.MongoDbInitializ
 builder.Services.AddScoped<PayBille.Api.Interfaces.IBancoService, PayBille.Api.Services.BancoService>();
 builder.Services.AddScoped<PayBille.Api.Interfaces.ICuentaBancariaService, PayBille.Api.Services.CuentaBancariaService>();
 builder.Services.AddScoped<PayBille.Api.Interfaces.IMovimientoBancarioService, PayBille.Api.Services.MovimientoBancarioService>();
+builder.Services.AddScoped<PayBille.Api.Interfaces.IVentaService, PayBille.Api.Services.VentaService>();
 
 // ── MVC / Swagger ──────────────────────────────────────────────────────────
 builder.Services.AddControllers();

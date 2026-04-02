@@ -1,0 +1,62 @@
+meta {
+  name: IngresoRapido
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/venta/ingreso-rapido
+  body: json
+  auth: bearer
+}
+
+headers {
+  Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "idEmpresa": "{{empresaId}}",
+    "idSucursal": "{{sucursalId}}",
+    "items": [
+      {
+        "nombre": "Producto Rápido 1",
+        "cantidad": 2,
+        "precio": 500.00,
+        "impuesto": 0,
+        "descuento": 0
+      },
+      {
+        "nombre": "Servicio Técnico",
+        "cantidad": 1,
+        "precio": 1200.00,
+        "impuesto": 0,
+        "descuento": 100.00
+      }
+    ],
+    "idCliente": null,
+    "nombreCliente": "Cliente General",
+    "descuentoCliente": 0,
+    "ncf": null,
+    "rnc": null,
+    "efectivo": 2200.00,
+    "credito": 0,
+    "deposito": 0,
+    "canje": 0,
+    "financiamiento": 0,
+    "idPersona": null,
+    "nombreUsuario": null,
+    "idTurno": null,
+    "nota": null
+  }
+}
+
+script:post-response {
+  if (res.body.code === "0") {
+    bru.setVar("ventaId", res.body.data.id);
+  }
+}
